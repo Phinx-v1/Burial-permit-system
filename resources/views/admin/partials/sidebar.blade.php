@@ -652,6 +652,7 @@
                     </svg>
                 </div>
                 <div class="nav-section-content">
+                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'cemetery_manager')
                     <a href="{{ route('permits.index') }}" class="nav-item {{ request()->routeIs('permits.*') ? 'active' : '' }}"
                         title="Burial Permits (Alt + 2)">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -660,6 +661,7 @@
                         </svg>
                         <span>Burial Permits</span>
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -671,6 +673,7 @@
                     </svg>
                 </div>
                 <div class="nav-section-content">
+                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'cemetery_manager')
                     <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}"
                         title="Cemetery Map (Alt + 3)">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -679,6 +682,7 @@
                         </svg>
                         <span>Cemetery Map</span>
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -690,6 +694,7 @@
                     </svg>
                 </div>
                 <div class="nav-section-content">
+                    @if(auth()->user()->role === 'admin')
                     <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}"
                         title="Reports (Alt + 4)">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -706,6 +711,7 @@
                         </svg>
                         <span>Import Excel</span>
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -717,6 +723,7 @@
                     </svg>
                 </div>
                 <div class="nav-section-content">
+                    @if(auth()->user()->role === 'admin')
                     <a href="{{ route('admin.dataquality') }}"
                         class="nav-item {{ request()->routeIs('admin.dataquality') ? 'active' : '' }}"
                         title="Data Quality (Alt + 6)">
@@ -726,6 +733,7 @@
                         </svg>
                         <span>Data Quality</span>
                     </a>
+                    @endif
                 </div>
             </div>
         @endif
@@ -749,7 +757,7 @@
             </div>
             <div>
                 <div class="user-name">{{ auth()->user()->name }}</div>
-                <div class="user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
+                <div class="user-role">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
             </div>
 
             <div class="user-actions">
@@ -798,12 +806,6 @@
     function toggleDark() {
         const isDark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('lgu_dark', isDark ? '1' : '0');
-        updateDarkLabel(isDark);
-    }
-
-    function updateDarkLabel(isDark) {
-        const label = document.getElementById('darkToggleLabel');
-        if (label) label.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
     }
 
     function toggleSidebar() {
@@ -812,69 +814,35 @@
     }
 
     function toggleSection(header) {
-        const group = header.parentElement;
-        const isCollapsed = group.classList.toggle('is-collapsed');
-        if (group.id) {
-            localStorage.setItem('lgu_nav_' + group.id, isCollapsed ? '1' : '0');
-        }
+        const group = header.closest('.nav-group');
+        group.classList.toggle('is-collapsed');
+        
+        // Save state to localStorage
+        const groupId = group.id;
+        const isCollapsed = group.classList.contains('is-collapsed');
+        localStorage.setItem('lgu_nav_' + groupId, isCollapsed ? '1' : '0');
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        updateDarkLabel(document.documentElement.classList.contains('dark'));
-        
-        // Restore nav group collapsed states
+    // Restore section states
+    document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.nav-group').forEach(group => {
-            if (group.id && localStorage.getItem('lgu_nav_' + group.id) === '1') {
+            if (localStorage.getItem('lgu_nav_' + group.id) === '1') {
                 group.classList.add('is-collapsed');
             }
         });
     });
 
-    // ── Global Shortcuts ──
-    document.addEventListener('keydown', function(e) {
-        // Ctrl + F: Focus search
-        if ((e.ctrlKey || (e.metaKey && !e.ctrlKey)) && e.key.toLowerCase() === 'f') {
-            const activeEl = document.activeElement;
-            const isInput = activeEl instanceof HTMLInputElement || activeEl instanceof HTMLTextAreaElement;
-            if (!isInput && !e.shiftKey && !e.altKey) {
-                const searchEl = document.querySelector('.search-input, input[placeholder*="Search"]');
-                if (searchEl) {
-                    e.preventDefault();
-                    searchEl.focus();
-                    if (searchEl.select) searchEl.select();
-                }
-            }
-        }
-        // Alt + D: Toggle dark mode
-        if (e.altKey && e.key.toLowerCase() === 'd') {
-            e.preventDefault();
-            if (typeof toggleDark === 'function') toggleDark();
-        }
-        // Alt + B: Toggle sidebar
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        // Alt + B to toggle sidebar
         if (e.altKey && e.key.toLowerCase() === 'b') {
-            e.preventDefault();
             toggleSidebar();
         }
-        // Alt + 1-9: Navigate sidebar
-        const isDigit = e.key >= '1' && e.key <= '9';
-        const isNumpad = e.code && e.code.startsWith('Numpad') && ['1','2','3','4','5','6','7','8','9'].includes(e.code.slice(-1));
-
-        if (e.altKey && (isDigit || isNumpad)) {
-            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-            const num = isDigit ? parseInt(e.key) : parseInt(e.code.slice(-1));
-            const index = num - 1;
-            if (navItems[index]) {
-                e.preventDefault();
-                navItems[index].click();
-            }
+        // Alt + 1, 2, 3... for nav items
+        if (e.altKey && !isNaN(e.key)) {
+            const index = parseInt(e.key) - 1;
+            const items = document.querySelectorAll('.nav-item');
+            if (items[index]) items[index].click();
         }
     });
-
-    // Auto-focus search on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.querySelector('.search-input');
-        if (searchInput) searchInput.focus();
-    });
 </script>
-
-@include('admin.partials.persistence')

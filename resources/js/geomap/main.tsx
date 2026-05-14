@@ -8,10 +8,11 @@ const container = document.getElementById('geomap-root')
 const analyticsContainer = document.getElementById('geomap-analytics-root')
 
 if (container) {
+  const userRole = container.dataset.userRole ?? ''
   createRoot(container).render(
     <StrictMode>
       <NuqsAdapter>
-        <App />
+        <App userRole={userRole} />
       </NuqsAdapter>
     </StrictMode>
   )

@@ -1,6 +1,14 @@
 <div class="table-scroll">
     <table>
-        <colgroup><col/><col/><col/><col/><col/><col/><col/></colgroup>
+        <colgroup>
+            <col style="width: 140px;">
+            <col> <!-- Flexible: Deceased -->
+            <col style="width: 120px;">
+            <col style="width: 140px;">
+            <col style="width: 100px;">
+            <col style="width: 150px;">
+            <col style="width: 250px;">
+        </colgroup>
         <thead>
             <tr>
                 <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
@@ -33,7 +41,7 @@
                     @endif
                 </td>
                 <td>
-                    {{ $permit->deceased->full_name }}
+                    {{ optional($permit->deceased)->full_name ?? 'Unknown Deceased' }}
                 </td>
                 <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
                 <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
@@ -69,7 +77,7 @@
                         @if($cs === 'expired' || $cs === 'expiring')
                         <form id="renew-form-{{ $permit->id }}" method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline">
                             @csrf
-                            <button type="button" class="btn-action btn-renew" onclick="openRenewModal('{{ $permit->permit_number }}', '{{ str_replace('\'', '\\\'', $permit->deceased->full_name) }}', 'renew-form-{{ $permit->id }}')">
+                            <button type="button" class="btn-action btn-renew" onclick="openRenewModal('{{ $permit->permit_number }}', '{{ str_replace('\'', '\\\'', optional($permit->deceased)->full_name ?? 'Unknown Deceased') }}', 'renew-form-{{ $permit->id }}')">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
                                 Renew
                             </button>

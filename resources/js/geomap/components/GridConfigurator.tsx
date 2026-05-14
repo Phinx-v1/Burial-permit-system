@@ -8,7 +8,8 @@ export const GridConfigurator = () => {
     setIsGridConfigOpen, 
     gridOverlays, 
     setGridOverlays,
-    map 
+    map,
+    setConfirmModal
   } = useMapStore()
 
   const [newSection, setNewSection] = useState({
@@ -185,7 +186,13 @@ export const GridConfigurator = () => {
                           <div style={{ fontSize: '10px', color: '#64748b' }}>{sec.rows}x{sec.cols} Grid • {sec.labelFormat}</div>
                        </div>
                        <button 
-                         onClick={() => handleDelete(sec.id)}
+                         onClick={() => {
+                           setConfirmModal({
+                             message: 'Delete this block and all its niches permanently?',
+                             itemName: `Block: ${sec.name}`,
+                             onConfirm: () => handleDelete(sec.id)
+                           });
+                         }}
                          style={{ background: 'none', border: 'none', color: '#ef4444', padding: '8px', cursor: 'pointer', opacity: 0.6 }}
                        >
                          <Trash2 size={16} />

@@ -153,7 +153,7 @@ function App() {
         useMapStore.getState().setHoveredGridId(null)
       })
 
-      // ── Click handling ──────────────────────────────────────────
+      // Click handling
       map.on('click', 'niche-lines-halo', (e: any) => {
         if (e.features?.[0]) {
           e.preventDefault()
@@ -166,6 +166,18 @@ function App() {
       (map.getSource('niche-lines') as any).setData(geojson as any)
     }
   }, [map, isLoaded, gridOverlays])
+
+  // ─── Exact Search Pinpoint ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!map || !isLoaded) return
+
+    // Restore line opacity unconditionally as requested by user
+    if (map.getLayer('niche-lines-base')) {
+      map.setPaintProperty('niche-lines-base', 'line-opacity', 1.0)
+      map.setPaintProperty('niche-lines-dots', 'circle-opacity', 1.0)
+    }
+  }, [map, isLoaded, selectedFeature])
+
 
   // Keep line width reactive to hover/selected
   const hoveredGridId = useMapStore(s => s.hoveredGridId)
@@ -195,12 +207,16 @@ function App() {
     if (urlSearchHandledRef.current) return // Don't re-run if already handled
     urlSearchHandledRef.current = true
 
+    // Remove ?search= from URL so navigating away and back doesn't re-trigger
+    const cleanUrl = window.location.pathname
+    window.history.replaceState({}, '', cleanUrl)
+
     const fetchAndFly = async () => {
       try {
         const res = await fetch(`/cemetery/search-permits?q=${encodeURIComponent(q)}`)
         const results = await res.json()
         if (results && results.length > 0) {
-          handleFlyTo(results[0])
+          handleFlyTo(results[0])  // auto-open modal as expected
         }
       } catch (err) { /* silent */ }
     }
@@ -209,19 +225,19 @@ function App() {
   }, [isLoaded, map, gridOverlays])
 
   // ─── Fly-to from search ────────────────────────────────────────────────────────
-  const handleFlyTo = (res: any) => {
+  const handleFlyTo = (res: any, skipAutoOpen = false) => {
     if (!map) return
     if (res.longitude && res.latitude) {
-      map.flyTo({ center: [res.longitude, res.latitude], zoom: 18, speed: 1.2, essential: true })
+      map.flyTo({ center: [res.longitude, res.latitude], zoom: 19.5, speed: 1.2, essential: true })
     }
 
-    // If it's a grid niche, open the grid popup automatically
-    if (res.grid_id) {
+    // If it's a grid niche, ONLY open the full grid popup if it's NOT an exact pinpoint search
+    if (res.grid_id && !res.is_exact) {
       useMapStore.getState().setSelectedGridId(String(res.grid_id))
     }
 
-    // Sync to store for pulse animation (NicheGrid will pick this up)
-    useMapStore.getState().setSelectedFeature({ ...res, fromSearch: true })
+    // Sync to store for pulse animation + auto-open
+    useMapStore.getState().setSelectedFeature({ ...res, fromSearch: true, skipAutoOpen })
   }
 
   const island: React.CSSProperties = {

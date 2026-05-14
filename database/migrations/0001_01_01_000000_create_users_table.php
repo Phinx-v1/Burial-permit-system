@@ -40,7 +40,7 @@ return new class extends Migration
         // ── users ─────────────────────────────────────────────────
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('employee_number');
+            $table->string('employee_number')->nullable();
             $table->string('name');
             $table->string('rank')->nullable();
             $table->string('gender')->nullable();
@@ -75,58 +75,10 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        // ── deceased_persons ──────────────────────────────────────
-        // Stripped to 1986 logbook essentials only
-        Schema::create('deceased_persons', function (Blueprint $table) {
-            $table->id();
-            $table->string('last_name');
-            $table->string('first_name');
-            $table->string('middle_name')->nullable();  // kept as requested
-            $table->date('date_of_death');
-            $table->string('kind_of_burial')->nullable(); // TOMB / GRAVE-INFANT / NICHES / BONE NICHES
-            $table->timestamps();
-        });
-
-        // ── burial_permits ────────────────────────────────────────
-        // Holds all request/payment info from Image 1 & yellow slip
-        Schema::create('burial_permits', function (Blueprint $table) {
-            $table->id();
-            $table->string('permit_number')->unique();
-            $table->foreignId('deceased_id')->constrained('deceased_persons')->onDelete('cascade');
-
-            // Permit meta
-            $table->enum('permit_type', ['new', 'renewal'])->default('new');
-            $table->enum('status', ['pending', 'approved', 'released', 'expired'])->default('pending');
-
-            // Requestor info (from Image 1 & yellow slip)
-            $table->string('requestor_name');
-            $table->string('requestor_relation')->nullable();   // e.g. MOTHER, FATHER
-            $table->string('requestor_address')->nullable();
-            $table->string('requestor_contact')->nullable();
-
-            // Deceased info needed on permit (from yellow slip)
-            $table->string('nationality')->nullable();
-            $table->unsignedTinyInteger('age')->nullable();
-            $table->string('sex')->nullable();
-            $table->date('date_of_death')->nullable(); // denormalized for quick print
-
-            // Fee info (from yellow slip & Image 1)
-            $table->string('burial_fee_type')->nullable();      // cemented / niche_1st / etc.
-            $table->decimal('amount_paid', 10, 2)->nullable();
-            $table->decimal('balance', 10, 2)->nullable();
-
-            // OR / payment receipt (Image 1 bottom)
-            $table->string('or_number')->nullable();
-            $table->date('paid_on')->nullable();
-
-            $table->timestamps();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('burial_permits');
-        Schema::dropIfExists('deceased_persons');
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');

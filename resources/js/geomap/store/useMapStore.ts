@@ -26,6 +26,12 @@ export interface PendingGrid {
   distanceM: number
 }
 
+export interface ConfirmState {
+  message: string;
+  itemName: string;
+  onConfirm: () => void | Promise<void>;
+}
+
 interface MapState {
   map: any | null
   setMap: (map: any | null) => void
@@ -43,6 +49,10 @@ interface MapState {
   // Pending config modal state
   pendingGrid: PendingGrid | null
   setPendingGrid: (pg: PendingGrid | null) => void
+
+  // Global Confirmation Modal State
+  confirmModal: ConfirmState | null
+  setConfirmModal: (modal: ConfirmState | null) => void
 
   // View Settings
   mapStyle: 'vector' | 'satellite'
@@ -88,6 +98,9 @@ export const useMapStore = create<MapState>((set, get) => ({
 
   pendingGrid: null,
   setPendingGrid: (pendingGrid) => set({ pendingGrid }),
+
+  confirmModal: null,
+  setConfirmModal: (confirmModal) => set({ confirmModal }),
 
   mapStyle: 'satellite',
   setMapStyle: (mapStyle) => set({ mapStyle }),

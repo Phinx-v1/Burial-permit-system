@@ -59,6 +59,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'upload-documents',
         ]);
 
+        // Cemetery Manager — map and grid management
+        $cemeteryManager = Role::firstOrCreate(['name' => 'cemetery_manager']);
+        $cemeteryManager->syncPermissions([
+            'view-dashboard',
+            'manage-cemetery',
+        ]);
+
         // Create Super Admin user
         $superAdminUser = User::firstOrCreate(
             ['email' => 'superadmin@lgucarmen.gov.ph'],

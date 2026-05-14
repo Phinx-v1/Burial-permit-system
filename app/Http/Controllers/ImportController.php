@@ -237,9 +237,13 @@ class ImportController extends Controller
     private function getLogs()
     {
         try {
-            if (! Schema::hasTable('import_logs')) {
-                return new LengthAwarePaginator([], 0, 5);
+            if (! \Illuminate\Support\Facades\Schema::hasTable('import_logs')) {
+                \Illuminate\Support\Facades\Log::warning("IMPORT_LOG_DEBUG: Table 'import_logs' DOES NOT EXIST.");
+                return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 5);
             }
+
+            $count = \App\Models\ImportLog::count();
+            \Illuminate\Support\Facades\Log::info("IMPORT_LOG_DEBUG: Table exists. Count: {$count}");
 
             return ImportLog::with('user')->latest()->paginate(5);
         } catch (\Throwable) {

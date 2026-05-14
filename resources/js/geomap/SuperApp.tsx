@@ -10,6 +10,7 @@ import {
 import { useMapStore } from './store/useMapStore'
 import { PlotSearch } from './components/Map/PlotSearch'
 import { AdvancedSidebar } from './components/Map/AdvancedSidebar'
+import { SystemDeleteModal } from './components/Map/SystemDeleteModal'
 
 // ─── Geo helpers ───────────────────────────────────────────────────────────────
 function calcBearing(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -510,6 +511,8 @@ function SuperApp() {
           </div>
         )}
       </AnimatePresence>
+
+      <SystemDeleteModal />
     </div>
   )
 }

@@ -67,7 +67,7 @@ class SuperAdminDashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('superadmin.users.index', compact(
+        return view('superadmin.dashboard', compact(
             'totalPermits',
             'activePermits',
             'expiringPermits',

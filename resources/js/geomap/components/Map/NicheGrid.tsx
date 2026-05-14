@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore, GridSection } from '../../store/useMapStore'
 import { X, Settings2, Trash2, User, Calendar, FileText, ChevronDown } from 'lucide-react'
 
@@ -20,20 +22,83 @@ function getLabel(r: number, c: number, custom?: string) {
 
 const STATUS_BG: Record<string, string> = {
   available: '#22c55e',
-  occupied:  '#ef4444',
-  reserved:  '#f59e0b',
-  empty:     'rgba(255,255,255,0.07)',
+  occupied: '#ef4444',
+  reserved: '#f59e0b',
+  empty: 'rgba(255,255,255,0.07)',
 }
 
 // Fast easing — no spring physics
 const FAST = { duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] as any }
-const POP  = { duration: 0.18, ease: [0.34, 1.26, 0.64, 1.0]  as any }
+const POP = { duration: 0.18, ease: [0.34, 1.26, 0.64, 1.0] as any }
+
+// ─── Geo Minimap ─────────────────────────────────────────────────────────────
+const GeographicMinimap = memo(({ lat, lng }: { lat: number, lng: number }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!containerRef.current || !lat || !lng) return
+    const minimap = new (maplibregl as any).Map({
+      container: containerRef.current,
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [lng, lat],
+      zoom: 17.8,
+      interactive: false,
+      attributionControl: false
+    })
+
+    minimap.on('load', () => {
+      minimap.addSource('google-satellite', {
+        type: 'raster',
+        tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
+        tileSize: 256
+      })
+      minimap.addLayer({
+        id: 'satellite-layer',
+        type: 'raster',
+        source: 'google-satellite'
+      })
+
+      const sourceId = 'exact-minimap-point'
+      minimap.addSource(sourceId, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] } }]
+        }
+      })
+      minimap.addLayer({
+        id: 'exact-search-square',
+        type: 'symbol',
+        source: sourceId,
+        layout: {
+          'text-field': '■',
+          'text-size': 24,
+          'text-allow-overlap': true,
+        },
+        paint: {
+          'text-color': '#ef4444',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 2,
+        }
+      })
+    })
+
+    return () => minimap.remove()
+  }, [lat, lng])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', padding: '12px 12px 0 12px', textAlign: 'center' }}>Locator Map</div>
+      <div ref={containerRef} style={{ flex: 1, width: '100%', minHeight: '300px', borderRadius: '18px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }} />
+    </div>
+  )
+})
 
 // ─── Niche Info Modal (Universal System Design) ──────────────────────────────
 const NicheInfoModal = memo(({ nicheModal, blockName, onClose }: { nicheModal: any; blockName: string; onClose: () => void }) => {
-  const [data, setData]       = useState<any>(null)
+  const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (!nicheModal?.deceased_id) { setLoading(false); setError(true); return }
@@ -59,7 +124,7 @@ const NicheInfoModal = memo(({ nicheModal, blockName, onClose }: { nicheModal: a
         backgroundColor: 'rgba(0,0,0,0.6)',
         backdropFilter: 'blur(16px)',
         zIndex: 99999,
-        display: 'flex', 
+        display: 'flex',
         alignItems: 'center',       // Vertical center
         justifyContent: 'center',    // Horizontal center
         padding: '20px',
@@ -75,7 +140,8 @@ const NicheInfoModal = memo(({ nicheModal, blockName, onClose }: { nicheModal: a
         onMouseDown={(e: any) => e.stopPropagation()}
         onClick={(e: any) => e.stopPropagation()}
         style={{
-          width: '380px',
+          width: '840px',
+          maxWidth: '95vw',
           maxHeight: '90vh',
           backgroundColor: '#0f172a',
           borderRadius: '32px',
@@ -84,62 +150,75 @@ const NicheInfoModal = memo(({ nicheModal, blockName, onClose }: { nicheModal: a
           boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)',
           position: 'relative',
           display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-          scrollbarWidth: 'none',
+          flexDirection: 'row',
+          gap: '32px',
         }}
       >
-        <button 
-           onClick={onClose}
-           style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
         >
           <X size={20} />
         </button>
 
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: '900', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
-            Niche Occupant · {blockName}
+        {/* LEFT COLUMN: Data & Stats */}
+        <div style={{ flex: '0 0 340px', display: 'flex', flexDirection: 'column', overflowY: 'auto', scrollbarWidth: 'none', paddingRight: '12px' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: '900', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              Niche Occupant · {blockName}
+            </div>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', color: 'white', margin: 0, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+              {loading ? '...' : (data?.full_name || nicheModal.deceased_name)}
+            </h2>
           </div>
-          <h2 style={{ fontSize: '32px', fontWeight: '900', color: 'white', margin: 0, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-            {loading ? '...' : (data?.full_name || nicheModal.deceased_name)}
-          </h2>
-        </div>
 
-        {loading ? (
-          <div style={{ padding: '24px', color: '#64748b', textAlign: 'center' }}>Loading dossier...</div>
-        ) : data ? (
-          <>
-            <div style={{ padding: '24px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
-               <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>Permit Status</div>
-               <div style={{ fontSize: '18px', color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {loading ? (
+            <div style={{ padding: '24px', color: '#64748b', textAlign: 'center' }}>Loading dossier...</div>
+          ) : data ? (
+            <>
+              <div style={{ padding: '24px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
+                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>Permit Status</div>
+                <div style={{ fontSize: '18px', color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: data.permit?.status === 'active' ? '#22c55e' : '#ef4444' }} />
                   {data.permit ? `${data.permit.permit_number} — ${data.permit.status.toUpperCase()}` : 'No Active Permit'}
-               </div>
-            </div>
+                </div>
+              </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '32px' }}>
-               <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: 'auto' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.04)' }}>
                   <div style={{ fontSize: '8px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Date of Death</div>
                   <div style={{ fontSize: '12px', color: 'white', fontWeight: '600' }}>{data.date_of_death || '—'}</div>
-               </div>
-               <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                </div>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.04)' }}>
                   <div style={{ fontSize: '8px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Kind of Burial</div>
                   <div style={{ fontSize: '12px', color: 'white', fontWeight: '600' }}>{data.kind_of_burial || '—'}</div>
-               </div>
-            </div>
+                </div>
+              </div>
 
-            <button 
-              onClick={onClose}
-              style={{ width: '100%', backgroundColor: 'white', color: '#0f172a', border: 'none', padding: '18px', borderRadius: '18px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
-              onMouseDown={(e: any) => e.currentTarget.style.transform = 'scale(0.98)'}
-              onMouseUp={(e: any) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              Close Record
-            </button>
-          </>
-        ) : (
-          <div style={{ padding: '24px', color: '#ef4444', textAlign: 'center' }}>Error loading data.</div>
-        )}
+              <button
+                onClick={onClose}
+                style={{ width: '100%', marginTop: '32px', backgroundColor: 'white', color: '#0f172a', border: 'none', padding: '18px', borderRadius: '18px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
+                onMouseDown={(e: any) => e.currentTarget.style.transform = 'scale(0.98)'}
+                onMouseUp={(e: any) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                Close Record
+              </button>
+            </>
+          ) : (
+            <div style={{ padding: '24px', color: '#ef4444', textAlign: 'center' }}>Error loading data.</div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: Locator Minimap */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: '320px' }}>
+          {nicheModal.latitude && nicheModal.longitude ? (
+            <GeographicMinimap lat={nicheModal.latitude} lng={nicheModal.longitude} />
+          ) : (
+            <div style={{ flex: 1, minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.05)' }}>
+              Location unavailable
+            </div>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   )
@@ -150,22 +229,23 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
   const {
     map, removeGridSection, updateGridCell, updateGridStatus,
     editMode, hoveredGridId, selectedGridId, setSelectedGridId,
-    setSelectedFeature, filterStatus
+    setSelectedFeature, filterStatus, setConfirmModal
   } = useMapStore()
   const selectedFeature = useMapStore(s => s.selectedFeature)
 
-  const gridRef  = useRef<HTMLDivElement>(null)
-  const [editingCell, setEditingCell]           = useState<string | null>(null)
-  const [hoveredCell, setHoveredCell]           = useState<string | null>(null)
-  const [showConfig, setShowConfig]             = useState(false)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const [editingCell, setEditingCell] = useState<string | null>(null)
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null)
+  const [showConfig, setShowConfig] = useState(false)
   const [isMouseOverPanel, setIsMouseOverPanel] = useState(false)
-  const [nicheModal, setNicheModal]             = useState<any | null>(null)
-  const [pulseActive, setPulseActive]           = useState(false)
+  const [nicheModal, setNicheModal] = useState<any | null>(null)
+  const [pulseActive, setPulseActive] = useState(false)
   const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const modalOpenedForRef = useRef<string | null>(null)
 
-  const isSelected   = selectedGridId === String(section.id)
-  const isHovered    = hoveredGridId  === String(section.id)
-  const isExpanded   = isSelected || isHovered || isMouseOverPanel
+  const isSelected = selectedGridId === String(section.id)
+  const isHovered = hoveredGridId === String(section.id)
+  const isExpanded = isSelected || isMouseOverPanel
   const isManageMode = editMode !== 'view'
 
   // Position update via direct DOM — no React state, no re-render on every frame
@@ -191,24 +271,83 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
   // Start pulse timer whenever selectedFeature (fromSearch) changes
   useEffect(() => {
     if (selectedFeature?.fromSearch && selectedFeature?.deceased_id) {
-      setPulseActive(true)
-      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
-      pulseTimerRef.current = setTimeout(() => {
-        setPulseActive(false)
-      }, 12000) // auto-stop after 12 seconds
+      if (String(selectedFeature.grid_id) === String(section.id)) {
+        setPulseActive(true)
+        if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
+        pulseTimerRef.current = setTimeout(() => {
+          setPulseActive(false)
+        }, 12000) // auto-stop after 12 seconds
+
+        // Auto-open NicheInfoModal for this user — only once per unique search result
+        const uniqueKey = `${selectedFeature.deceased_id}-${selectedFeature.grid_row}-${selectedFeature.grid_col}`
+        if (modalOpenedForRef.current === uniqueKey) return
+        if (selectedFeature.skipAutoOpen) return  // Don't pop modal when navigating from Burial Permits
+        modalOpenedForRef.current = uniqueKey
+
+        const cellData = section.cells?.[`${selectedFeature.grid_row}-${selectedFeature.grid_col}`] || {};
+        setNicheModal({
+          ...cellData,
+          deceased_id: selectedFeature.deceased_id,
+          deceased_name: selectedFeature.deceased_name,
+          key: `${selectedFeature.grid_row}-${selectedFeature.grid_col}`,
+          grid_row: selectedFeature.grid_row,
+          grid_col: selectedFeature.grid_col,
+          grid_rows: section.rows || 4,
+          grid_cols: section.cols || 10,
+          latitude: selectedFeature.latitude,
+          longitude: selectedFeature.longitude
+        })
+      }
     } else {
       setPulseActive(false)
     }
     return () => {
       if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
     }
-  }, [selectedFeature])
+  }, [selectedFeature, section])
 
-  const rows = useMemo(() => Array.from({ length: section.rows || 4  }, (_, i) => i + 1), [section.rows])
+  const rows = useMemo(() => Array.from({ length: section.rows || 4 }, (_, i) => i + 1), [section.rows])
   const cols = useMemo(() => Array.from({ length: section.cols || 10 }, (_, i) => i + 1), [section.cols])
 
-  const openModal  = useCallback((cell: any, key: string, label: string) => setNicheModal({ ...cell, key, label }), [])
-  const closeModal = useCallback(() => setNicheModal(null), [])
+  const openModal = useCallback((cell: any, key: string, label: string) => {
+    const parts = key.split('-');
+    const r = parseInt(parts[0]);
+    const c = parseInt(parts[1]);
+
+    // Calculate exact coordinate for manual clicks
+    let lat = section.position?.lat;
+    let lng = section.position?.lng;
+    if (section.cols && section.lineStart && section.lineEnd) {
+      const cols = section.cols;
+      if (cols > 0 && c > 0 && c <= cols) {
+        const fraction = (c - 0.5) / cols;
+        lat = section.lineStart.lat + fraction * (section.lineEnd.lat - section.lineStart.lat);
+        lng = section.lineStart.lng + fraction * (section.lineEnd.lng - section.lineStart.lng);
+      }
+    }
+
+    setNicheModal({
+      ...cell,
+      key,
+      label,
+      grid_row: r,
+      grid_col: c,
+      grid_rows: section.rows || 4,
+      grid_cols: section.cols || 10,
+      latitude: lat,
+      longitude: lng
+    })
+  }, [section])
+  const closeModal = useCallback(() => {
+    setNicheModal(null)
+    // Clear the search state so it doesn't auto-reopen on next render
+    modalOpenedForRef.current = null
+    setSelectedFeature(null)
+    // Zoom back out to cemetery overview
+    if (map) {
+      map.flyTo({ center: [125.714882, 7.370672], zoom: 17, speed: 1.0, essential: true })
+    }
+  }, [setSelectedFeature, map])
 
   return (
     <>
@@ -254,7 +393,14 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
                     {isManageMode && isSelected && (
                       <>
                         <button onClick={(e: any) => { e.stopPropagation(); setShowConfig((v: any) => !v) }} style={iconBtn}><Settings2 size={11} /></button>
-                        <button onClick={(e: any) => { e.stopPropagation(); if (confirm(`Delete "${section.name}"?`)) removeGridSection(section.id) }} style={{ ...iconBtn, background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}><Trash2 size={11} /></button>
+                        <button onClick={(e: any) => { 
+                          e.stopPropagation(); 
+                          setConfirmModal({
+                            message: 'Delete this block permanently?',
+                            itemName: `Block: ${section.name}`,
+                            onConfirm: () => removeGridSection(section.id)
+                          });
+                        }} style={{ ...iconBtn, background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}><Trash2 size={11} /></button>
                       </>
                     )}
                     {isSelected && <button onClick={(e: any) => { e.stopPropagation(); setIsMouseOverPanel(false); setSelectedGridId(null) }} style={iconBtn}><X size={11} /></button>}
@@ -266,11 +412,11 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
                   {rows.map(r => (
                     <div key={r} style={{ display: 'flex', gap: '3px', minWidth: 'max-content' }}>
                       {cols.map((c: any) => {
-                        const key    = `${r}-${c}`
+                        const key = `${r}-${c}`
                         const cell: any = section.cells?.[key] || {}
                         const status = cell.status || 'available'
-                        const label  = getLabel(r, c, cell.label)
-                        const isHov  = hoveredCell === key
+                        const label = getLabel(r, c, cell.label)
+                        const isHov = hoveredCell === key
 
                         return (
                           <div key={c} style={{ position: 'relative' }}
@@ -462,8 +608,8 @@ const iconBtn: React.CSSProperties = {
 
 // ─── Cell Editor ─────────────────────────────────────────────────────────────
 const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, isManageMode }: any) => {
-  const { updateGridCell, updateGridStatus } = useMapStore()
-  const [search, setSearch]   = useState('')
+  const { updateGridCell, updateGridStatus, setConfirmModal } = useMapStore()
+  const [search, setSearch] = useState('')
   const [results, setResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -497,13 +643,13 @@ const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, i
   }, [search, fetchResults])
 
   const assign = (p: any) => {
-    updateGridCell(section.id, cellKey, { 
-      label: p.deceased_name, 
-      deceased_id: p.deceased_id, 
-      deceased_name: p.deceased_name, 
-      permit_number: p.permit_number, 
-      permit_status: p.permit_status, 
-      status: 'occupied' 
+    updateGridCell(section.id, cellKey, {
+      label: p.deceased_name,
+      deceased_id: p.deceased_id,
+      deceased_name: p.deceased_name,
+      permit_number: p.permit_number,
+      permit_status: p.permit_status,
+      status: 'occupied'
     })
     onClose()
   }
@@ -511,10 +657,10 @@ const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, i
   return (
     <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={FAST}
       onClick={(e: any) => e.stopPropagation()}
-      style={{ 
-        position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', 
-        marginBottom: '10px', width: '240px', background: '#0f172a', borderRadius: '16px', 
-        padding: '16px', zIndex: 300, border: `1px solid ${color}80`, 
+      style={{
+        position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+        marginBottom: '10px', width: '240px', background: '#0f172a', borderRadius: '16px',
+        padding: '16px', zIndex: 300, border: `1px solid ${color}80`,
         boxShadow: '0 20px 50px rgba(0,0,0,0.9)',
         fontFamily: '"DM Sans", sans-serif'
       }}>
@@ -531,7 +677,16 @@ const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, i
               <span style={{ fontSize: '12px', color: 'white', fontWeight: 700 }}>{cellData.deceased_name}</span>
               <span style={{ fontSize: '9px', color: '#64748b', fontFamily: '"DM Mono", monospace' }}>{cellData.permit_number}</span>
             </div>
-            <button onClick={() => updateGridCell(section.id, cellKey, { deceased_id: null, deceased_name: null })}
+            <button onClick={() => {
+              setConfirmModal({
+                message: 'Remove permit and unassign occupant?',
+                itemName: `Occupant: ${cellData.deceased_name}`,
+                onConfirm: () => {
+                  updateGridCell(section.id, cellKey, { deceased_id: null, deceased_name: null });
+                  onClose();
+                }
+              });
+            }}
               style={{ background: 'rgba(239,68,68,0.15)', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '6px', borderRadius: '8px' }}><X size={12} /></button>
           </div>
         ) : (
@@ -543,20 +698,20 @@ const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, i
                 <ChevronDown size={14} />
               </div>
             </div>
-            
+
             {/* Results List */}
-            <div style={{ 
-              marginTop: '6px', maxHeight: '180px', overflowY: 'auto', background: '#1e293b', 
-              borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', 
+            <div style={{
+              marginTop: '6px', maxHeight: '180px', overflowY: 'auto', background: '#1e293b',
+              borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 10px 25px rgba(0,0,0,0.5)', scrollbarWidth: 'none'
             }}>
               {loading && <div style={{ padding: '12px', fontSize: '11px', color: '#64748b', textAlign: 'center' }}>Searching...</div>}
               {!loading && results.length === 0 && <div style={{ padding: '12px', fontSize: '11px', color: '#64748b', textAlign: 'center' }}>No unassigned people found.</div>}
               {results.map((r: any, i: number) => (
-                <button key={i} onClick={() => assign(r)} 
-                  style={{ 
-                    width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', 
-                    border: 'none', borderBottom: '1px solid rgba(255,255,255,0.03)', color: 'white', 
+                <button key={i} onClick={() => assign(r)}
+                  style={{
+                    width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent',
+                    border: 'none', borderBottom: '1px solid rgba(255,255,255,0.03)', color: 'white',
                     fontSize: '12px', cursor: 'pointer', transition: 'background 0.2s',
                     display: 'flex', flexDirection: 'column', gap: '2px'
                   }}
@@ -578,15 +733,15 @@ const CellEditor = memo(({ section, cellKey, color, status, cellData, onClose, i
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
         {['available', 'occupied', 'reserved', 'empty'].map((s: string) => (
           <button key={s} onClick={() => { updateGridStatus(section.id, cellKey, s); onClose() }}
-            style={{ 
-              padding: '8px', fontSize: '10px', borderRadius: '8px', 
-              background: status === s ? color : 'rgba(255,255,255,0.05)', 
-              color: 'white', border: '1px solid rgba(255,255,255,0.05)', 
+            style={{
+              padding: '8px', fontSize: '10px', borderRadius: '8px',
+              background: status === s ? color : 'rgba(255,255,255,0.05)',
+              color: 'white', border: '1px solid rgba(255,255,255,0.05)',
               cursor: 'pointer', textTransform: 'capitalize', fontWeight: 800,
               transition: 'all 0.2s'
             }}
-            onMouseEnter={(e: any) => { if(status !== s) e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
-            onMouseLeave={(e: any) => { if(status !== s) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+            onMouseEnter={(e: any) => { if (status !== s) e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
+            onMouseLeave={(e: any) => { if (status !== s) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
           >{s}</button>
         ))}
       </div>

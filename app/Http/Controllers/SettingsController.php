@@ -61,7 +61,7 @@ class SettingsController extends Controller
 
         $this->save($settings);
 
-        return redirect()->route('settings.index')
+        return redirect()->route('settings.index', ['tab' => $section])
             ->with('success', ucfirst($section) . ' settings saved successfully.');
     }
 
@@ -165,7 +165,7 @@ class SettingsController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,super_admin',
+            'role' => 'required|in:admin,super_admin,cemetery_manager',
         ]);
 
         $user = User::create([
@@ -230,7 +230,7 @@ class SettingsController extends Controller
 
         $user->update(['profile_photo' => $path]);
 
-        return redirect()->route('settings.index')
+        return redirect()->route('settings.index', ['tab' => 'profile'])
             ->with('success', 'Profile photo updated successfully.');
     }
 
@@ -247,7 +247,7 @@ class SettingsController extends Controller
 
         $user->update(['profile_photo' => null]);
 
-        return redirect()->route('settings.index')
+        return redirect()->route('settings.index', ['tab' => 'profile'])
             ->with('success', 'Profile photo removed.');
     }
 
@@ -588,6 +588,190 @@ class SettingsController extends Controller
             );
         }
 
-        return response()->json(['success' => true]);
+    }
+
+    public function previewMerge(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:2',
+            'type' => 'required|in:permit,deceased',
+        ]);
+
+        $ids = $request->ids;
+        $type = $request->type;
+
+        if ($type === 'deceased') {
+            $records = DeceasedPerson::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+            $master = $records->shift();
+            $fields = ['middle_name', 'date_of_death', 'nationality', 'age', 'sex', 'kind_of_burial'];
+            $label = "{$master->first_name} {$master->last_name}";
+        } else {
+            $records = BurialPermit::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+            $master = $records->shift();
+            $fields = ['applicant_name', 'applicant_relationship', 'applicant_contact', 'applicant_address', 'remarks', 'or_number', 'issued_date', 'expiry_date'];
+            $label = $master->permit_number;
+        }
+
+        $consolidatedFields = [];
+        foreach ($fields as $field) {
+            $masterVal = $master->{$field};
+            if (empty($masterVal) || $masterVal === 'Unknown') {
+                foreach ($records as $victim) {
+                    if (!empty($victim->{$field}) && $victim->{$field} !== 'Unknown') {
+                        $consolidatedFields[] = [
+                            'field' => ucwords(str_replace('_', ' ', $field)),
+                            'from' => $victim->id,
+                            'value' => (string) $victim->{$field}
+                        ];
+                        break; 
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'master' => [
+                'id' => $master->id,
+                'label' => $label,
+                'date' => $master->created_at->format('M d, Y'),
+                'data' => $master->toArray()
+            ],
+            'victims' => $records->map(fn($r) => [
+                'id' => $r->id,
+                'label' => ($type === 'deceased') ? "{$r->first_name} {$r->last_name}" : $r->permit_number,
+                'date' => $r->created_at->format('M d, Y')
+            ]),
+            'updates' => $consolidatedFields
+        ]);
+    }
+
+    public function mergeRecords(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:2',
+            'type' => 'required|in:permit,deceased',
+        ]);
+
+        $ids = $request->ids;
+        $type = $request->type;
+
+        DB::beginTransaction();
+        try {
+            if ($type === 'deceased') {
+                $records = DeceasedPerson::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+                if ($records->count() < 2) throw new \Exception('Not enough records found to merge.');
+
+                $master = $records->shift(); // Lowest ID is master
+                $masterLabel = $master->full_name;
+
+                foreach ($records as $victim) {
+                    // 1. Fill missing data in master from victim (Exhaustive)
+                    $fields = [
+                        'middle_name', 'name_extension', 'phone_number', 'date_of_birth', 
+                        'date_of_death', 'nationality', 'age', 'sex', 'civil_status', 
+                        'religion', 'kind_of_burial', 'place_of_death', 'cause_of_death', 
+                        'address', 'age_at_death'
+                    ];
+                    foreach ($fields as $field) {
+                        if (empty($master->$field) && !empty($victim->$field)) {
+                            $master->$field = $victim->$field;
+                        }
+                    }
+                    $master->save();
+
+                    // 2. Re-link Permits
+                    BurialPermit::where('deceased_id', $victim->id)->update(['deceased_id' => $master->id]);
+                    
+                    // 3. Re-link Cemetery Map Assignments
+                    CemeteryPlot::where('deceased_id', $victim->id)->update(['deceased_id' => $master->id]);
+                    
+                    // 4. Re-link Niche Grid Assignments (JSON field)
+                    $grids = CemeteryGrid::all();
+                    foreach ($grids as $grid) {
+                        if ($grid->cells) {
+                            $cells = is_string($grid->cells) ? json_decode($grid->cells, true) : $grid->cells;
+                            $changed = false;
+                            foreach ($cells as &$cell) {
+                                if (isset($cell['deceased_id']) && $cell['deceased_id'] == $victim->id) {
+                                    $cell['deceased_id'] = $master->id;
+                                    $changed = true;
+                                }
+                            }
+                            if ($changed) {
+                                $grid->update(['cells' => $cells]);
+                            }
+                        }
+                    }
+
+                    // 5. Re-link Activity logs
+                    \App\Models\ActivityLog::where('model_type', 'DeceasedPerson')
+                        ->where('model_id', $victim->id)
+                        ->update(['model_id' => $master->id]);
+
+                    $victim->delete();
+                }
+
+                \App\Models\ActivityLog::record(
+                    action: 'updated',
+                    modelType: 'DeceasedPerson',
+                    modelId: $master->id,
+                    modelLabel: $masterLabel,
+                    description: "Merged " . ($records->count() + 1) . " duplicate records into this person record. Information and map assignments consolidated."
+                );
+
+            } else {
+                // Merge Permits
+                $records = BurialPermit::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+                if ($records->count() < 2) throw new \Exception('Not enough permits found to merge.');
+
+                $master = $records->shift();
+                $masterLabel = $master->permit_number;
+
+                foreach ($records as $victim) {
+                    // 1. Fill missing data (Exhaustive)
+                    $fields = [
+                        'permit_type', 'kind_of_burial', 'applicant_name', 'applicant_relationship', 
+                        'applicant_contact', 'applicant_address', 'remarks', 'or_number', 
+                        'issued_date', 'expiry_date', 'status'
+                    ];
+                    foreach ($fields as $field) {
+                        if ((empty($master->$field) || $master->$field === 'Unknown' || $master->$field === 'pending') && !empty($victim->$field)) {
+                            $master->$field = $victim->$field;
+                        }
+                    }
+                    $master->save();
+                    
+                    // 2. Re-link Documents
+                    \App\Models\Document::where('permit_id', $victim->id)->update(['permit_id' => $master->id]);
+
+                    // 3. Re-link Transactions
+                    \DB::table('transactions')->where('permit_id', $victim->id)->update(['permit_id' => $master->id]);
+
+                    // 4. Re-link SMS Notifications
+                    \App\Models\SmsNotification::where('permit_id', $victim->id)->update(['permit_id' => $master->id]);
+
+                    // 5. Re-link Activity logs
+                    \App\Models\ActivityLog::where('model_type', 'BurialPermit')
+                        ->where('model_id', $victim->id)
+                        ->update(['model_id' => $master->id]);
+
+                    $victim->delete();
+                }
+
+                \App\Models\ActivityLog::record(
+                    action: 'updated',
+                    modelType: 'BurialPermit',
+                    modelId: $master->id,
+                    modelLabel: $masterLabel,
+                    description: "Merged " . ($records->count() + 1) . " duplicate permits into this record. Documents and transactions consolidated."
+                );
+            }
+
+            DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

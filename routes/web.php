@@ -33,13 +33,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/superadmin/export', [SuperAdminDashboardController::class, 'export'])->name('superadmin.export');
         Route::get('/superadmin/export-excel', [SuperAdminDashboardController::class, 'exportExcel'])->name('superadmin.export-excel');
         Route::get('/superadmin/activity', [SuperAdminDashboardController::class, 'activityLog'])->name('superadmin.activity');
+
         Route::get('/superadmin/reports', [ReportController::class, 'superAdminIndex'])->name('superadmin.reports');
         Route::get('/superadmin/reports/excel', [ReportController::class, 'exportExcel'])->name('superadmin.reports.excel');
         Route::get('/superadmin/reports/pdf', [ReportController::class, 'export'])->name('superadmin.reports.pdf');
         Route::get('/reports', fn() => redirect()->route('superadmin.reports'));
-        Route::resource('users', UserController::class)->names('admin.users');
+        Route::resource('users', UserController::class)->names('superadmin.users');
         Route::get('/superadmin/geomap', [SuperAdminDashboardController::class, 'geomap'])
             ->name('superadmin.geomap');
+        Route::get('/superadmin/data-quality', [SettingsController::class, 'dataQualityPage'])
+            ->name('superadmin.dataquality');
+    });
+
+    // ── Super Admin + Cemetery Manager ──
+    Route::middleware(['role:super_admin|cemetery_manager'])->group(function () {
         Route::apiResource('/niche-grids', CemeteryGridController::class)->except(['index'])->names('superadmin.nichegrids');
     });
 
@@ -57,12 +64,14 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/settings/users/{user}',   [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
         Route::get('/settings/dataquality/scan',  [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
         Route::post('/settings/dataquality/update', [SettingsController::class, 'updateRecord'])->name('settings.dataquality.update');
+        Route::post('/settings/dataquality/merge', [SettingsController::class, 'mergeRecords'])->name('settings.dataquality.merge');
+        Route::post('/settings/dataquality/preview', [SettingsController::class, 'previewMerge'])->name('settings.dataquality.preview');
         Route::post('/settings/profile-photo',       [SettingsController::class, 'updateProfilePhoto'])->name('settings.profile.update');
         Route::delete('/settings/profile-photo',     [SettingsController::class, 'deleteProfilePhoto'])->name('settings.profile.delete');
     });
 
-    // ── Admin + Super Admin ──
-    Route::middleware(['role:admin|super_admin'])->group(function () {
+    // ── Admin + Super Admin + Cemetery Manager ──
+    Route::middleware(['role:admin|super_admin|cemetery_manager'])->group(function () {
         
         // Niche Grids (Read-Only for Admin)
         Route::get('/niche-grids', [CemeteryGridController::class, 'index'])->name('nichegrids.index');

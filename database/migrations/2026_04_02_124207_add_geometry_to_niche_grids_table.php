@@ -11,10 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('niche_grids', function (Blueprint $table) {
-            $table->float('rotation')->default(0)->after('longitude');
-            $table->float('width_scale')->default(1.0)->after('rotation');
-        });
+        // Columns already exist in base migration
     }
 
     /**

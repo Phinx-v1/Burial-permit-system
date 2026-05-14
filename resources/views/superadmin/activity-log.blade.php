@@ -40,17 +40,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .main { margin-left: 224px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .main { width: 100%; display: flex; flex-direction: column; min-width: 0; }
 
         /* ── TOPBAR ── */
-        .topbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            height: 64px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 2rem;
-            position: sticky; top: 0; z-index: 40;
-        }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; }
         .topbar-title { font-size: 16px; font-weight: 700; color: var(--text-1); letter-spacing: -.02em; }
         .topbar-date  { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin-top: 2px; }
 
@@ -186,9 +179,9 @@
         .user-chip:hover { border-color: var(--accent); background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         
         .user-avatar {
-            width: 26px; height: 26px; border-radius: 50%;
-            background: var(--navy);
-            color: #fff; font-size: 10px; font-weight: 800;
+            width: 26px; height: 26px; border-radius: 0;
+            background: transparent;
+            font-size: 11px; font-weight: 800;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
@@ -196,24 +189,21 @@
 
         /* Role Variations */
         .user-chip.role-super-admin { background: #f5f3ff; border-color: #ddd6fe; }
-        .user-chip.role-super-admin .user-name { color: #5b21b6; }
-        .user-chip.role-super-admin .user-avatar { background: #7c3aed; }
+        .user-chip.role-super-admin .user-name, .user-chip.role-super-admin .user-avatar { color: #5b21b6; }
 
         .user-chip.role-admin { background: #eff6ff; border-color: #dbeafe; }
-        .user-chip.role-admin .user-name { color: #1e40af; }
-        .user-chip.role-admin .user-avatar { background: #3b82f6; }
+        .user-chip.role-admin .user-name, .user-chip.role-admin .user-avatar { color: #1e40af; }
 
         .user-chip.role-system { background: #f8fafc; border-color: #e2e8f0; }
-        .user-chip.role-system .user-name { color: #475569; font-weight: 500; }
-        .user-chip.role-system .user-avatar { background: #94a3b8; }
+        .user-chip.role-system .user-name, .user-chip.role-system .user-avatar { color: #475569; font-weight: 500; }
 
         /* Dark Mode Overrides */
         html.dark .user-chip.role-super-admin { background: #2e1065; border-color: #4c1d95; }
-        html.dark .user-chip.role-super-admin .user-name { color: #ddd6fe; }
+        html.dark .user-chip.role-super-admin .user-name, html.dark .user-chip.role-super-admin .user-avatar { color: #ddd6fe; }
         html.dark .user-chip.role-admin { background: #172554; border-color: #1e3a8a; }
-        html.dark .user-chip.role-admin .user-name { color: #dbeafe; }
+        html.dark .user-chip.role-admin .user-name, html.dark .user-chip.role-admin .user-avatar { color: #dbeafe; }
         html.dark .user-chip.role-system { background: #1e293b; border-color: #334155; }
-        html.dark .user-chip.role-system .user-name { color: #94a3b8; }
+        html.dark .user-chip.role-system .user-name, html.dark .user-chip.role-system .user-avatar { color: #94a3b8; }
 
         /* col: Time */
         .td-time { text-align: right; white-space: nowrap; min-width: 140px; }
@@ -250,7 +240,7 @@
 </head>
 <body>
 
-@include('superadmin.partials.sidebar')
+@include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
 <div class="main">
 
@@ -380,7 +370,7 @@
                             <div class="user-chip {{ $chipRoleClass }}">
                                 <div class="user-avatar" style="overflow:hidden;">
                                     @if(!$isSys && $log->user?->profile_photo)
-                                        <img src="{{ asset('storage/' . $log->user->profile_photo) }}" alt="{{ $userName }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                        <img src="{{ asset('storage/' . $log->user->profile_photo) }}" alt="{{ $userName }}" style="width:100%;height:100%;object-fit:cover;border-radius:0;">
                                     @else
                                         {{ $avatar }}
                                     @endif

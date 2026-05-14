@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,38 +9,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-    overflow: hidden;
-}
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow: hidden;
+        }
 
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: url('{{ asset("images/lgu-building.jpg") }}') center/cover no-repeat;
-    filter: blur(6px);
-    transform: scale(1.05);
-    z-index: -1;
-}
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: url('{{ asset("images/lgu-building.jpg") }}') center/cover no-repeat;
+            filter: blur(6px);
+            transform: scale(1.05);
+            z-index: -1;
+        }
 
-body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 31, 61, 0.45);
-    z-index: -1;
-}
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 31, 61, 0.45);
+            z-index: -1;
+        }
 
         .top-bar {
             width: 100%;
@@ -59,17 +66,17 @@ body::after {
         }
 
         .gov-text h1 {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.3;
-}
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
 
-.gov-text p {
-    font-size: 11px;
-    color: rgba(255,255,255,.7);
-    margin-top: 2px;
-}
+        .gov-text p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .7);
+            margin-top: 2px;
+        }
 
         .card {
             width: 100%;
@@ -78,7 +85,7 @@ body::after {
             border-radius: 10px;
             border: 1px solid #e5e7eb;
             padding: 1.75rem 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .04);
             opacity: 0;
             animation: fadeIn .4s ease .2s forwards;
         }
@@ -114,7 +121,9 @@ body::after {
             gap: 7px;
         }
 
-        .form-group { margin-bottom: 1rem; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
 
         .form-group label {
             display: block;
@@ -124,7 +133,9 @@ body::after {
             margin-bottom: 5px;
         }
 
-        .input-wrap { position: relative; }
+        .input-wrap {
+            position: relative;
+        }
 
         .input-icon {
             position: absolute;
@@ -154,10 +165,12 @@ body::after {
 
         input:focus {
             border-color: #1a2744;
-            box-shadow: 0 0 0 3px rgba(26,39,68,.07);
+            box-shadow: 0 0 0 3px rgba(26, 39, 68, .07);
         }
 
-        input.error { border-color: #dc2626; }
+        input.error {
+            border-color: #dc2626;
+        }
 
         .pw-toggle {
             position: absolute;
@@ -172,7 +185,10 @@ body::after {
             padding: 2px;
             transition: color .15s;
         }
-        .pw-toggle:hover { color: #374151; }
+
+        .pw-toggle:hover {
+            color: #374151;
+        }
 
         .remember {
             display: flex;
@@ -216,10 +232,12 @@ body::after {
 
         .btn-submit:hover {
             background: #243459;
-            box-shadow: 0 4px 12px rgba(26,39,68,.18);
+            box-shadow: 0 4px 12px rgba(26, 39, 68, .18);
         }
 
-        .btn-submit:active { opacity: .9; }
+        .btn-submit:active {
+            opacity: .9;
+        }
 
         .btn-submit:disabled {
             opacity: .6;
@@ -229,7 +247,7 @@ body::after {
         .spinner {
             width: 14px;
             height: 14px;
-            border: 2px solid rgba(255,255,255,.3);
+            border: 2px solid rgba(255, 255, 255, .3);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin .5s linear infinite;
@@ -247,42 +265,57 @@ body::after {
         }
 
         .bottom-strip {
-    margin-top: 18px;
-    font-size: 11px;
-    color: rgba(255,255,255,.5);
-    opacity: 0;
-    animation: fadeIn .4s ease .35s forwards;
-}
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
+            margin-top: 18px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, .5);
+            opacity: 0;
+            animation: fadeIn .4s ease .35s forwards;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         @media (max-width: 480px) {
-            .card { padding: 1.5rem; }
+            .card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="top-bar">
         <div style="position: relative; width: 46px; height: 46px; flex-shrink: 0;">
-            <img src="{{ asset('images/carmen-seal.png') }}" alt="Municipality of Carmen Seal" class="gov-seal" style="border-radius:50%;object-fit:cover; position: absolute; inset: 0;">
+            <img src="{{ asset('images/carmen-seal.png') }}" alt="Municipality of Carmen Seal" class="gov-seal"
+                style="border-radius:50%;object-fit:cover; position: absolute; inset: 0;">
             <svg width="46" height="46" viewBox="0 0 48 48" fill="none" style="position: absolute; inset: 0;">
-                <circle cx="24" cy="24" r="22" stroke="#1a2744" stroke-width="1.5"/>
-                <circle cx="24" cy="24" r="15" stroke="#1a2744" stroke-width="1"/>
-                <circle cx="24" cy="24" r="4" fill="#1a2744"/>
-                <line x1="24" y1="9" x2="24" y2="15" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="24" y1="33" x2="24" y2="39" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="9"  y1="24" x2="15" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="33" y1="24" x2="39" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="13" y1="13" x2="17.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-                <line x1="30.5" y1="30.5" x2="35" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-                <line x1="35" y1="13" x2="30.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-                <line x1="17.5" y1="30.5" x2="13" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="24" cy="24" r="22" stroke="#1a2744" stroke-width="1.5" />
+                <circle cx="24" cy="24" r="15" stroke="#1a2744" stroke-width="1" />
+                <circle cx="24" cy="24" r="4" fill="#1a2744" />
+                <line x1="24" y1="9" x2="24" y2="15" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="24" y1="33" x2="24" y2="39" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="9" y1="24" x2="15" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="33" y1="24" x2="39" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="13" y1="13" x2="17.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round" />
+                <line x1="30.5" y1="30.5" x2="35" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round" />
+                <line x1="35" y1="13" x2="30.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round" />
+                <line x1="17.5" y1="30.5" x2="13" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round" />
             </svg>
         </div>
         <div class="gov-text">
@@ -298,25 +331,25 @@ body::after {
         </div>
 
         @if($errors->any())
-        <div class="alert">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            {{ $errors->first() }}
-        </div>
+            <div class="alert">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {{ $errors->first() }}
+            </div>
         @endif
 
         @if(session('error'))
-        <div class="alert">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            {{ session('error') }}
-        </div>
+            <div class="alert">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {{ session('error') }}
+            </div>
         @endif
 
         <form method="POST" action="{{ route('login') }}" id="loginForm">
@@ -326,16 +359,14 @@ body::after {
                 <label for="email">Email Address</label>
                 <div class="input-wrap">
                     <span class="input-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                            <polyline points="22,6 12,13 2,6"/>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
                         </svg>
                     </span>
-                    <input type="email" id="email" name="email"
-                        value="{{ old('email') }}"
-                        placeholder="your@email.com"
-                        class="{{ $errors->has('email') ? 'error' : '' }}"
-                        required autofocus autocomplete="email">
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="your@email.com"
+                        class="{{ $errors->has('email') ? 'error' : '' }}" required autofocus autocomplete="email">
                 </div>
             </div>
 
@@ -343,19 +374,19 @@ body::after {
                 <label for="password">Password</label>
                 <div class="input-wrap">
                     <span class="input-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <rect x="3" y="11" width="18" height="11" rx="2"/>
-                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8">
+                            <rect x="3" y="11" width="18" height="11" rx="2" />
+                            <path d="M7 11V7a5 5 0 0110 0v4" />
                         </svg>
                     </span>
-                    <input type="password" id="password" name="password"
-                        placeholder="••••••••"
-                        class="{{ $errors->has('password') ? 'error' : '' }}"
-                        required autocomplete="current-password">
+                    <input type="password" id="password" name="password" placeholder="••••••••"
+                        class="{{ $errors->has('password') ? 'error' : '' }}" required autocomplete="current-password">
                     <button type="button" class="pw-toggle" onclick="togglePw()" tabindex="-1">
-                        <svg id="eyeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
+                        <svg id="eyeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
                         </svg>
                     </button>
                 </div>
@@ -431,5 +462,5 @@ body::after {
         });
     </script>
 </body>
-</html>
 
+</html>

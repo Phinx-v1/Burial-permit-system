@@ -34,7 +34,7 @@
             height: 100vh;
         }
 
-        .main { height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .main { height: 100%; width: 100%; display: flex; flex-direction: column; position: relative; }
 
         #geomap-analytics-root { flex: 1; position: relative; }
 
@@ -53,7 +53,7 @@
 </head>
 <body>
 
-@include('superadmin.partials.sidebar')
+@include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
 <div class="main">
     <div id="geomap-analytics-root" 

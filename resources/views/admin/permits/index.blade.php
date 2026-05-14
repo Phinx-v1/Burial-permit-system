@@ -31,23 +31,45 @@
         tr.row-expiring td:first-child { border-left: 3px solid #f59e0b; }
         html.dark tr.row-expiring td { background: #2a1f00 !important; border-top-color: #854d0e !important; }
 
+        :root {
+            --navy: #0f1e3d;
+            --navy-mid: #1a2f5e;
+            --navy-light: #243459;
+            --accent: #3b82f6;
+            --accent-bg: #eff6ff;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --green: #10b981;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --border: #e2e8f0;
+            --border-2: #f1f5f9;
+            --text-1: #0f172a;
+            --text-2: #475569;
+            --text-3: #94a3b8;
+            --mono: 'DM Mono', monospace;
+            --header-h: 72px;
+            --title-fs: 20px;
+        }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-        .main { flex: 1; display: flex; flex-direction: column; }
-        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; position: sticky; top: 0; z-index: 40; }
-        .topbar-title { font-size: 15px; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
-        .topbar-date { font-size: 11px; color: #94a3b8; font-weight: 400; }
+        .main { width: calc(100% - var(--sb-width, 220px)); display: flex; flex-direction: column; }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; width: 100%; }
+        .topbar-title { font-size: var(--title-fs); font-weight: 700; color: #0f172a; letter-spacing: -.02em; }
+        .topbar-date { font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
         .role-tag { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; }
-        .content { padding: 1.75rem; }
+        .content { padding: 1.75rem 1.75rem 1.75rem 1rem; background: #f8fafc; display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
         .panel { 
             background: #fff; 
             border: 1px solid #e2e8f0; 
             border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.02);
             overflow: hidden; 
-            min-width: min-content; 
             display: flex;
             flex-direction: column;
-            min-height: 600px; /* Ensures enough space for 10 rows + pagination without scrolling */
+            min-height: 600px;
+            width: 100%;
+            max-width: 1400px;
         }
         .panel-header { position: relative; padding: .9rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; flex-shrink: 0; }
         .panel-header h3 { font-size: 13px; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
@@ -69,22 +91,19 @@
         .table-scroll { 
             flex: 1;
             overflow-x: auto; 
-            overflow-y: hidden; 
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* IE and Edge */
+            /* overflow-y: hidden;  <-- Removed to allow sticky headers with body scroll */
+            scrollbar-width: thin;
         }
         /* Completely hide scrollbars for Chrome, Safari and Opera */
         .table-scroll::-webkit-scrollbar { display: none; }
-        .table-scroll thead th { position: sticky; top: 0; z-index: 2; }
+        .table-scroll thead th { 
+            position: sticky; 
+            top: 0; /* Changed to 0 as topbar is not sticky by default, or adjust based on topbar */
+            z-index: 10; 
+            background: #f8fafc;
+        }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        table colgroup col:nth-child(1) { width: 155px; }
-        table colgroup col:nth-child(2) { width: 185px; }
-        table colgroup col:nth-child(3) { width: 120px; }
-        table colgroup col:nth-child(4) { width: 125px; }
-        table colgroup col:nth-child(5) { width: 110px; }
-        table colgroup col:nth-child(6) { width: 145px; }
-        table colgroup col:nth-child(7) { width: 185px; }
         td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         th { font-size: 10px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; padding: .5rem 1rem; text-align: left; background: #f8fafc; font-family: 'DM Mono', monospace; }
         td { font-size: 13px; color: #475569; padding: .7rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: middle; transition: background-color .15s ease; }
@@ -160,13 +179,13 @@
         /* MODAL */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.25); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
-        .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
+        .modal { background: #ffffff !important; border-radius: 12px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
         @keyframes modalIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .modal-header { padding: 1rem 1.25rem; border-bottom: 2px solid #1a2744; display: flex; align-items: center; justify-content: space-between; background: #1a2744; }
         .modal-header h3 { font-size: 15px; font-weight: 700; color: #fff; }
         .modal-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 4px; line-height: 1; transition: color .15s; }
         .modal-close:hover { color: #fff; }
-        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
+        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; background: #ffffff; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-label { font-size: 11px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .05em; }
         .form-control { font-family: 'Inter', sans-serif; font-size: 13px; color: #111827; padding: .45rem .75rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; background: #fff; }
@@ -227,7 +246,9 @@
     html.dark .form-label { color: #94a3b8 !important; }
     html.dark .modal { background: #1e2130 !important; }
     html.dark .modal-header { background: #111827 !important; }
+    html.dark #deleteModal .modal-header { background: #991b1b !important; border-bottom-color: #7f1d1d !important; }
     html.dark .modal-body { background: #1e2130 !important; }
+    html.dark #deleteModal .modal-body { background: #1e2130 !important; }
     html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
     html.dark .table-scroll { scrollbar-color: #374151 transparent; }
     html.dark .table-scroll::-webkit-scrollbar-thumb { background: #374151; }
@@ -269,20 +290,28 @@
 
 <div class="main">
     <div class="topbar">
-        <div>
-            <div class="topbar-title">Burial Permits</div>
-            <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
+        <div class="topbar-left">
+            <div class="topbar-title">
+                Burial Permits 
+                <a href="{{ route('support.manual') }}#permits" class="help-link-trigger" title="How to use this page" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </a>
+            </div>
+            <div class="topbar-date">System Management & Issuance</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
-            <span class="role-tag">Admin</span>
+            <span class="role-tag">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
+            @if(auth()->user()->role === 'admin')
             <button class="btn-primary" onclick="openPM()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New Permit
             </button>
+            @endif
         </div>
     </div>
 
     <div class="content">
+
         <div class="panel">
             <div class="panel-header">
                 <h3>All Burial Permits
@@ -544,12 +573,14 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
     <!-- FAB: New Permit -->
+    @if(auth()->user()->role === 'admin')
     <button onclick="openPM()" class="fab" title="New Burial Permit">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
     </button>
+    @endif
 
 </body>
 </html>

@@ -34,6 +34,11 @@
             justify-content: space-between;
             padding: 0 1.75rem;
             height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--navy);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .topbar-left {
             display: flex;
@@ -50,22 +55,39 @@
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            color: #64748b;
+            color: rgba(255,255,255,0.55);
             font-size: 13px;
             font-weight: 500;
             text-decoration: none;
             transition: color 0.15s;
         }
         .topbar-back:hover {
-            color: var(--navy);
+            color: #fff;
         }
         .topbar-sep {
-            color: #cbd5e1;
+            color: rgba(255,255,255,0.2);
             font-size: 11px;
         }
-        html.dark .topbar-back { color: #94a3b8; }
-        html.dark .topbar-back:hover { color: #fff; }
-        html.dark .topbar-sep { color: #475569; }
+        .topbar .topbar-title {
+            color: #fff !important;
+        }
+        .topbar .role-pill {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.8);
+        }
+        .topbar .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            color: #fff;
+        }
+        .topbar .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        html.dark .topbar { 
+            background: var(--navy);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
         /* ── Page layout ── */
         .hero {
@@ -1130,7 +1152,7 @@
 
 <body>
 
-    @include('admin.partials.sidebar')
+    @include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
     <div class="main">
         <div class="topbar">
@@ -1143,18 +1165,20 @@
                     Permits
                 </a>
                 <span class="topbar-sep">/</span>
-                <div class="topbar-title">{{ $permit->permit_number }}</div>
+                <div class="topbar-title" style="font-weight: 700;">{{ optional($permit->deceased)->full_name ?? 'Unknown Deceased' }}</div>
             </div>
             <div class="topbar-right">
-                <span class="role-pill">Admin</span>
+                <span class="role-pill">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
+                @if(auth()->user()->role === 'admin')
                 <button type="button" class="btn btn-secondary" onclick="openEditModal()">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        style="margin-right: 4px;">
                         <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        <path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                     Edit
                 </button>
+                @endif
             </div>
         </div>
 
@@ -1238,10 +1262,9 @@
                         </form>
                     @endif
 
-                    <form method="POST" action="{{ route('permits.destroy', $permit) }}" style="display:contents"
-                        onsubmit="return confirm('Delete this permit permanently?')">
+                    <form method="POST" action="{{ route('permits.destroy', $permit) }}" style="display:contents" id="deletePermitForm_{{ $permit->id }}">
                         @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
+                        <button type="button" class="btn btn-danger" onclick="openDeleteModal('Delete this permit permanently?', '{{ $permit->permit_number }}', 'deletePermitForm_{{ $permit->id }}')">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <polyline points="3 6 5 6 21 6" />
@@ -1504,9 +1527,9 @@
                                 <div class="doc-actions" onclick="event.stopPropagation()">
                                     <a href="{{ $viewUrl }}" class="btn-doc" target="_blank">↓ Download</a>
                                     <form method="POST" action="{{ route('documents.destroy', $doc) }}"
-                                        onsubmit="return confirm('Delete this file?')" style="display:inline">
+                                        id="deleteDocForm_{{ $doc->id }}" style="display:inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn-doc btn-doc-delete">✕ Delete</button>
+                                        <button type="button" class="btn-doc btn-doc-delete" onclick="openDeleteModal('Delete this file permanently?', '{{ addslashes($doc->file_name) }}', 'deleteDocForm_{{ $doc->id }}')">✕ Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -2033,6 +2056,7 @@
 
 
 @include('admin.partials.renewal-modal')
+@include('admin.partials.delete-modal')
 </body>
 
 </html>

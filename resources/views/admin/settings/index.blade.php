@@ -15,14 +15,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .main { flex: 1; display: flex; flex-direction: column; }
-        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
+        body { font-family: 'DM Sans', sans-serif; background: #f0f2f5; color: #111827; display: flex; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+        .main { width: 100%; display: flex; flex-direction: column; }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
         .topbar-date  { font-size: 12px; color: #9ca3af; }
         .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
         .content { padding: 1.5rem; display: flex; gap: 1.5rem; align-items: flex-start; }
-        .settings-nav  { width: 200px; flex-shrink: 0; position: sticky; top: 68px; }
+        .settings-nav  { width: 200px; flex-shrink: 0; position: sticky; top: 124px; }
         .settings-body { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
 
         /* NAV */
@@ -88,6 +88,7 @@
         .role-pill { display: inline-flex; font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 4px; }
         .role-admin { background: #dbeafe; color: #1e40af; }
         .role-super  { background: #ede9fe; color: #5b21b6; }
+        .role-cemetery { background: #fff7ed; color: #ea580c; }
 
         /* BUTTONS */
         .btn-sm { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
@@ -202,7 +203,7 @@
         .modal-header h3 { font-size: 14px; font-weight: 700; color: #fff; }
         .modal-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.6); font-size: 18px; line-height: 1; }
         .modal-close:hover { color: #fff; }
-        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
+        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; background: #ffffff; }
         .modal-footer { padding: .85rem 1.25rem; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: .6rem; }
 
         /* DANGER */
@@ -258,7 +259,11 @@
     html.dark .form-label { color: #94a3b8 !important; }
     html.dark .modal { background: #1e2130 !important; }
     html.dark .modal-header { background: #111827 !important; }
+    html.dark #deleteModal .modal-header { background: #991b1b !important; border-bottom-color: #7f1d1d !important; }
     html.dark .modal-body { background: #1e2130 !important; }
+    /* Keep delete modal body always white even in dark mode */
+    html.dark #deleteModal .modal { background: #ffffff !important; border: none !important; }
+    html.dark #deleteModal .modal-body { background: #ffffff !important; }
     html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
     html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
     html.dark .fee-row { border-color: #2d3148 !important; }
@@ -364,10 +369,15 @@
 <div class="main">
     <div class="topbar">
         <div>
-            <div class="topbar-title">Settings</div>
+            <div class="topbar-title">
+                Settings
+                <a href="{{ route('support.manual') }}#settings" class="help-link-trigger" title="How to use settings" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </a>
+            </div>
             <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
         </div>
-        <span class="role-tag">{{ ucfirst(str_replace('_',' ', auth()->user()->role ?? 'admin')) }}</span>
+        <span class="role-tag">{{ auth()->user()->role === 'super_admin' ? 'Super Admin' : (auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin') }}</span>
     </div>
 
     <div class="content">
@@ -457,9 +467,9 @@
 
                         <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.85rem">
                             @if(auth()->user()->profile_photo)
-                                <form method="POST" action="{{ route('settings.profile.delete') }}" onsubmit="return confirm('Remove your profile photo?')" style="margin:0">
+                                <form method="POST" action="{{ route('settings.profile.delete') }}" id="deleteProfilePhotoForm" style="margin:0">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn-danger">Remove Photo</button>
+                                    <button type="button" class="btn-danger" onclick="openDeleteModal('Remove your profile photo?', 'Profile Photo', 'deleteProfilePhotoForm')">Remove Photo</button>
                                 </form>
                             @endif
                             <button type="submit" class="btn-primary" id="uploadBtn" disabled>
@@ -593,9 +603,9 @@
                             <tr>
                                 <td><div style="display:flex;align-items:center;gap:8px"><div class="user-avatar-sm">{{ strtoupper(substr($user->name,0,1)) }}</div><span style="font-weight:500">{{ $user->name }}</span>@if($user->id===auth()->id())<span style="font-size:10px;color:#9ca3af">(you)</span>@endif</div></td>
                                 <td style="color:#6b7280">{{ $user->email }}</td>
-                                <td><span class="role-pill {{ $user->role==='super_admin'?'role-super':'role-admin' }}">{{ ucfirst(str_replace('_',' ',$user->role)) }}</span></td>
+                                <td><span class="role-pill {{ $user->role==='super_admin'?'role-super':($user->role==='cemetery_manager'?'role-cemetery':'role-admin') }}">{{ ucfirst(str_replace('_',' ',$user->role)) }}</span></td>
                                 <td style="color:#6b7280;font-size:12px">{{ $user->created_at->format('M d, Y') }}</td>
-                                <td>@if($user->id!==auth()->id())<form method="POST" action="{{ route('settings.users.destroy',$user) }}" onsubmit="return confirm('Remove {{ $user->name }}?')">@csrf @method('DELETE')<button type="submit" class="btn-sm btn-sm-danger">Remove</button></form>@endif</td>
+                                <td>@if($user->id!==auth()->id())<form method="POST" action="{{ route('settings.users.destroy',$user) }}" id="deleteUserForm_{{ $user->id }}">@csrf @method('DELETE')<button type="button" class="btn-sm btn-sm-danger" onclick="openDeleteModal('Remove {{ $user->name }} permanently?', 'User: {{ $user->name }}', 'deleteUserForm_{{ $user->id }}')">Remove</button></form>@endif</td>
                             </tr>
                             @empty
                             <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:1.5rem">No users found.</td></tr>
@@ -629,15 +639,15 @@
                 <div class="section-body" style="gap:.75rem">
                     <div class="danger-item">
                         <div><div class="danger-title">Reset All Permit Fees</div><div class="danger-sub">Restores all fee values back to the original defaults.</div></div>
-                        <form method="POST" action="{{ route('settings.reset','fees') }}" onsubmit="return confirm('Reset fees?')">@csrf<button type="submit" class="btn-danger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>Reset Fees</button></form>
+                        <form method="POST" action="{{ route('settings.reset','fees') }}" id="resetFeesForm">@csrf<button type="button" class="btn-danger" onclick="openDeleteModal('Reset all permit fees to defaults?', 'Permit Fees', 'resetFeesForm')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>Reset Fees</button></form>
                     </div>
                     <div class="danger-item">
                         <div><div class="danger-title">Clear Import History</div><div class="danger-sub">Permanently deletes all Excel import log records.</div></div>
-                        <form method="POST" action="{{ route('settings.reset','import-logs') }}" onsubmit="return confirm('Delete import history?')">@csrf<button type="submit" class="btn-danger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Clear Logs</button></form>
+                        <form method="POST" action="{{ route('settings.reset','import-logs') }}" id="clearLogsForm">@csrf<button type="button" class="btn-danger" onclick="openDeleteModal('Delete all import history logs?', 'Import Logs', 'clearLogsForm')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Clear Logs</button></form>
                     </div>
                     <div class="danger-item">
                         <div><div class="danger-title">Reset All Settings</div><div class="danger-sub">Resets every configuration option back to factory defaults.</div></div>
-                        <form method="POST" action="{{ route('settings.reset','all') }}" onsubmit="return confirm('Reset ALL settings?')">@csrf<button type="submit" class="btn-danger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Reset Everything</button></form>
+                        <form method="POST" action="{{ route('settings.reset','all') }}" id="resetAllForm">@csrf<button type="button" class="btn-danger" onclick="openDeleteModal('Reset EVERYTHING to factory defaults?', 'All Settings', 'resetAllForm')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Reset Everything</button></form>
                     </div>
                 </div>
             </div>
@@ -657,7 +667,7 @@
                 <div class="field-group"><label class="field-label">Email *</label><input type="email" name="email" class="form-control" required placeholder="user@lgucarmen.gov.ph"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
                     <div class="field-group"><label class="field-label">Password *</label><input type="password" name="password" class="form-control" required minlength="8" placeholder="Min. 8 chars"></div>
-                    <div class="field-group"><label class="field-label">Role *</label><select name="role" class="form-control" required><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select></div>
+                    <div class="field-group"><label class="field-label">Role *</label><select name="role" class="form-control" required><option value="admin">Admin</option><option value="super_admin">Super Admin</option><option value="cemetery_manager">Cemetery Manager</option></select></div>
                 </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn-cancel" onclick="document.getElementById('addUserModal').classList.remove('open')">Cancel</button><button type="submit" class="btn-primary">Create User</button></div>
@@ -703,7 +713,31 @@ function showSection(id, el) {
     document.querySelectorAll('.snav-item').forEach(i => i.classList.remove('active'));
     document.getElementById('section-' + id).classList.add('active');
     el.classList.add('active');
+    
+    // Update hash for deep linking
+    if (window.history.pushState) {
+        window.history.replaceState(null, null, '#' + id);
+    } else {
+        window.location.hash = id;
+    }
 }
+
+// Auto-restore tab on load
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const tabId = params.get('tab') || window.location.hash.substring(1);
+    
+    if (tabId) {
+        // Find the nav item that corresponds to this section
+        const navItem = Array.from(document.querySelectorAll('.snav-item')).find(item => {
+            return item.getAttribute('onclick')?.includes(`'${tabId}'`);
+        });
+        
+        if (navItem) {
+            showSection(tabId, navItem);
+        }
+    }
+});
 
 /* ── Live fee totals ── */
 document.querySelectorAll('.fee-input').forEach(i => {
@@ -964,8 +998,11 @@ function filterDQ(type,btn){DQ.filter=type;document.querySelectorAll('.dq-filter
 function deletePerm(permitId, label, issueId, recId) {
     // Store pending delete info
     window._pendingDelete = { permitId, label, issueId, recId };
-    document.getElementById('deleteModal-label').textContent = label;
-    document.getElementById('deleteModal').classList.add('open');
+    openDeleteModal(
+        'Delete this permit and its deceased record permanently?',
+        label,
+        confirmDelete
+    );
 }
 
 function confirmDelete() {
@@ -1090,6 +1127,7 @@ function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 </script>
 
 
+@include('admin.partials.delete-modal')
 @livewireScripts    
 </body>
 </html>

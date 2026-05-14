@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('burial_permits', function (Blueprint $table) {
             $table->id();
-            $table->string('permit_number')->unique();
-            $table->foreignId('deceased_id')->constrained('deceased_persons')->onDelete('cascade');
+            $table->string('permit_number');
+            $table->foreignId('deceased_id')->nullable()->constrained('deceased_persons')->onDelete('cascade');
             $table->string('applicant_name');
             $table->string('applicant_relationship');
             $table->string('applicant_contact');

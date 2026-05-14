@@ -207,11 +207,37 @@ class CemeteryMapController extends Controller
             
             // Check Niche Grids
             $gridMatch = null;
+            $isExact = false;
+            $exactLat = null;
+            $exactLng = null;
+            $gridRow = null;
+            $gridCol = null;
+
             foreach ($allGrids as $grid) {
                 if ($grid->cells && (is_array($grid->cells) || is_object($grid->cells))) {
-                    foreach ($grid->cells as $cell) {
+                    foreach ($grid->cells as $cellKey => $cell) {
                         if (isset($cell['deceased_id']) && $cell['deceased_id'] == $permit->deceased_id) {
                             $gridMatch = $grid;
+
+                            // Calculate exact coordinate along the line
+                            if ($grid->cols && $grid->start_lat !== null && $grid->end_lat !== null) {
+                                $parts = explode('-', (string)$cellKey);
+                                if (count($parts) === 2) {
+                                    $row = (int) $parts[0];
+                                    $col = (int) $parts[1];
+                                    $cols = (int) $grid->cols;
+                                    
+                                    $gridRow = $row;
+                                    $gridCol = $col;
+
+                                    if ($cols > 0 && $col > 0 && $col <= $cols) {
+                                        $fraction = ($col - 0.5) / $cols;
+                                        $exactLat = $grid->start_lat + $fraction * ($grid->end_lat - $grid->start_lat);
+                                        $exactLng = $grid->start_lng + $fraction * ($grid->end_lng - $grid->start_lng);
+                                        $isExact = true;
+                                    }
+                                }
+                            }
                             break 2;
                         }
                     }
@@ -228,8 +254,13 @@ class CemeteryMapController extends Controller
                 'deceased_id' => $permit->deceased_id,
                 'has_plot' => ($plot || $gridMatch) ? true : false,
                 'grid_id' => $gridMatch ? $gridMatch->id : null,
-                'latitude' => $gridMatch ? $gridMatch->latitude : ($plot ? (float)$plot->latitude : null),
-                'longitude' => $gridMatch ? $gridMatch->longitude : ($plot ? (float)$plot->longitude : null),
+                'is_exact' => $isExact,
+                'grid_row' => $gridRow,
+                'grid_col' => $gridCol,
+                'grid_rows' => $gridMatch ? $gridMatch->rows : null,
+                'grid_cols' => $gridMatch ? $gridMatch->cols : null,
+                'latitude' => $isExact ? $exactLat : ($gridMatch ? $gridMatch->latitude : ($plot ? (float)$plot->latitude : null)),
+                'longitude' => $isExact ? $exactLng : ($gridMatch ? $gridMatch->longitude : ($plot ? (float)$plot->longitude : null)),
             ];
         });
 

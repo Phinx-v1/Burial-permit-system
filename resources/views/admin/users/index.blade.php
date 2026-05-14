@@ -21,7 +21,7 @@
         .deceased-name { font-weight: 500; color: var(--text-1); }
 
         /* ── Floating Action Button (FAB) ── */
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; background: #1a2744; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; outline: none; }
+        .fab { position: fixed; bottom: 2rem; right: 30px; width: 56px; height: 56px; background: #1a2744; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; outline: none; }
         .fab:hover { transform: scale(1.1) rotate(90deg); background: #2563eb; box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
         .fab svg { width: 24px; height: 24px; }
         html.dark .fab { background: #3b82f6; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
@@ -37,15 +37,22 @@
     <!-- TOPBAR -->
     <div class="topbar">
         <div class="topbar-left">
-            <div class="topbar-title">Dashboard</div>
+            <div class="topbar-title">
+                Dashboard
+                <a href="{{ route('support.manual') }}#overview" class="help-link-trigger" title="How to use this dashboard" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </a>
+            </div>
             <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
         </div>
         <div class="topbar-right">
-            <span class="role-pill">Admin</span>
+            <span class="role-pill">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('permits.index') }}#new" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size: 13px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New Permit
             </a>
+            @endif
         </div>
     </div>
 
@@ -87,6 +94,7 @@
                 <div class="stat-sub">{{ $stats['active'] }} active</div>
             </a>
 
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('reports.index') }}" class="stat-card fade-up d2">
                 <div class="stat-top">
                     <div class="stat-icon green">
@@ -98,6 +106,19 @@
                 <div class="stat-label">This Month</div>
                 <div class="stat-sub">Issued {{ now()->format('F') }}</div>
             </a>
+            @else
+            <div class="stat-card fade-up d2">
+                <div class="stat-top">
+                    <div class="stat-icon green">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <span class="stat-pill neu">{{ strtoupper(now()->format('M Y')) }}</span>
+                </div>
+                <div class="stat-value green">{{ $stats['this_month'] }}</div>
+                <div class="stat-label">This Month</div>
+                <div class="stat-sub">Issued {{ now()->format('F') }}</div>
+            </div>
+            @endif
 
             <a href="{{ route('permits.index', ['status' => 'expired']) }}" class="stat-card fade-up d3">
                 <div class="stat-top">
@@ -296,12 +317,14 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
 </script>
 @livewireScripts
     <!-- FAB: New Permit -->
+    @if(auth()->user()->role === 'admin')
     <a href="{{ route('permits.index') }}#new" class="fab" title="New Burial Permit">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
     </a>
+    @endif
 
 </body>
 </html>

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BurialPermit;
 use App\Models\DeceasedPerson;
+use App\Exports\BurialReportExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -64,16 +66,37 @@ class ReportController extends Controller
         $deceasedThisYear  = DeceasedPerson::whereYear('created_at', $year)->count();
         $deceasedThisMonth = DeceasedPerson::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
 
+        // Base trend
         $monthly = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
 
+        // Status-specific trends for sparklines
+        $activeMonthlyRaw = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
+            ->where('status', 'active')->whereYear('created_at', $year)
+            ->groupBy('month')->pluck('total', 'month')->toArray();
+            
+        $expiringMonthlyRaw = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
+            ->where('status', 'expiring')->whereYear('created_at', $year)
+            ->groupBy('month')->pluck('total', 'month')->toArray();
+
+        $expiredMonthlyRaw = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
+            ->where('status', 'expired')->whereYear('created_at', $year)
+            ->groupBy('month')->pluck('total', 'month')->toArray();
+
         $monthlyData = [];
+        $activeMonthlyData = [];
+        $expiringMonthlyData = [];
+        $expiredMonthlyData = [];
+
         $monthNames  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         for ($m = 1; $m <= 12; $m++) {
             $monthlyData[$m - 1] = $monthly[$m] ?? 0;
+            $activeMonthlyData[$m - 1] = $activeMonthlyRaw[$m] ?? 0;
+            $expiringMonthlyData[$m - 1] = $expiringMonthlyRaw[$m] ?? 0;
+            $expiredMonthlyData[$m - 1] = $expiredMonthlyRaw[$m] ?? 0;
         }
         $totalYearlyPermits = array_sum($monthlyData);
         $maxVal             = max(array_merge($monthlyData, [1]));
@@ -131,6 +154,7 @@ class ReportController extends Controller
             'urgentExpiring' => $urgentExpiring, 'expiringSoon' => $expiringSoon,
             'totalDeceased' => $totalDeceased, 'deceasedThisYear' => $deceasedThisYear, 'deceasedThisMonth' => $deceasedThisMonth,
             'monthlyData' => $monthlyData, 'totalYearlyPermits' => $totalYearlyPermits, 'busiestMonth' => $busiestMonth, 'busiestCount' => $busiestCount,
+            'activeMonthlyData' => $activeMonthlyData, 'expiringMonthlyData' => $expiringMonthlyData, 'expiredMonthlyData' => $expiredMonthlyData,
             'feeCounts' => $feeCounts, 'estimatedRevenue' => $estimatedRevenue, 'revenueBreakdown' => $revenueBreakdown,
             'year' => $year
         ];
@@ -150,78 +174,14 @@ class ReportController extends Controller
 
     public function exportExcel()
     {
-        $data = $this->prepareReportData();
+        $data     = $this->prepareReportData();
+        $settings = $this->loadSettings();
 
-        $templatePath = storage_path('app/templates/report_template.xlsx');
-        if (!file_exists($templatePath)) {
-            abort(404, 'Excel report template not found at storage/app/templates/report.xlsx');
-        }
+        $filename = 'LGU-Carmen-BurialReport-' . now()->format('Y-m-d') . '.xlsx';
 
-        $replacements = [
-            '${total_permits}'     => $data['totalPermits'],
-            '${active_permits}'    => $data['activePermits'],
-            '${expiring_permits}'  => $data['expiringPermits'],
-            '${expired_permits}'   => $data['expiredPermits'],
-            '${total_deceased}'    => $data['totalDeceased'],
-            '${new_permits}'       => $data['newPermits'],
-            '${renewed_permits}'   => $data['renewedPermits'],
-            '${total_this_year}'   => $data['totalYearlyPermits'],
-            '${busiest_month}'     => $data['busiestMonth'],
-            '${busiest_count}'     => $data['busiestCount'],
-            '${estimated_revenue}' => 'P ' . number_format($data['estimatedRevenue'], 2),
-            '${year}'              => $data['year'],
-            '${generated_at}'      => now()->format('M d, Y g:i A'),
-            '${prepared_by}'       => auth()->user()?->name ?? 'Administrator',
-            
-            // Burial Type Counts
-            '${count_cemented}'    => $data['feeCounts']['cemented'] ?? 0,
-            '${count_niche_1st}'   => $data['feeCounts']['niche_1st'] ?? 0,
-            '${count_niche_2nd}'   => $data['feeCounts']['niche_2nd'] ?? 0,
-            '${count_niche_3rd}'   => $data['feeCounts']['niche_3rd'] ?? 0,
-            '${count_niche_4th}'   => $data['feeCounts']['niche_4th'] ?? 0,
-            '${count_bone}'        => $data['feeCounts']['bone_niches'] ?? 0,
-        ];
-
-        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-        foreach($months as $idx => $m) {
-            $replacements['${'.$m.'}'] = $data['monthlyData'][$idx] ?? 0;
-        }
-
-        $tmpFile = sys_get_temp_dir() . '/BurialReport_' . time() . '.xlsx';
-        copy($templatePath, $tmpFile);
-
-        $zip = new \ZipArchive;
-        if ($zip->open($tmpFile) === true) {
-            // Replace in sharedStrings.xml (primary location for text)
-            if (($sharedStrings = $zip->getFromName('xl/sharedStrings.xml')) !== false) {
-                foreach ($replacements as $placeholder => $value) {
-                    $sharedStrings = str_replace(
-                        htmlspecialchars($placeholder, ENT_XML1),
-                        htmlspecialchars((string) $value, ENT_XML1),
-                        $sharedStrings
-                    );
-                    // Fallback for non-escaped placeholders
-                    $sharedStrings = str_replace($placeholder, htmlspecialchars((string) $value, ENT_XML1), $sharedStrings);
-                }
-                $zip->addFromString('xl/sharedStrings.xml', $sharedStrings);
-            }
-            
-            // Replace in sheet1.xml (in case some strings are inline)
-            if (($sheet1 = $zip->getFromName('xl/worksheets/sheet1.xml')) !== false) {
-                foreach ($replacements as $placeholder => $value) {
-                    $sheet1 = str_replace(
-                        htmlspecialchars($placeholder, ENT_XML1),
-                        htmlspecialchars((string) $value, ENT_XML1),
-                        $sheet1
-                    );
-                    $sheet1 = str_replace($placeholder, htmlspecialchars((string) $value, ENT_XML1), $sheet1);
-                }
-                $zip->addFromString('xl/worksheets/sheet1.xml', $sheet1);
-            }
-
-            $zip->close();
-        }
-
-        return response()->download($tmpFile, 'BurialReport_' . now()->format('Y-m-d') . '.xlsx')->deleteFileAfterSend(true);
+        return Excel::download(
+            new BurialReportExport($data, $settings),
+            $filename
+        );
     }
 }

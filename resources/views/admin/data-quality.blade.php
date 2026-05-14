@@ -35,17 +35,16 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             font-family: 'DM Sans', sans-serif;
             background: #f0f2f5;
             color: #111827;
-            -webkit-font-smoothing: antialiased;
             display: flex;
+            -webkit-font-smoothing: antialiased;
             min-height: 100vh;
         }
 
         /* ── LAYOUT ─────────────────────────────────────────────── */
         .main {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            min-height: calc(100vh - 144px);
         }
 
         .topbar {
@@ -56,9 +55,6 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             align-items: center;
             justify-content: space-between;
             padding: 0 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 40;
         }
 
         .topbar-left {
@@ -289,6 +285,17 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         .btn-sm.danger:hover {
             background: #fee2e2;
             border-color: #ef4444;
+        }
+
+        .btn-sm.btn-primary {
+            background: #1a2744;
+            color: #fff;
+            border-color: #1a2744;
+        }
+
+        .btn-sm.btn-primary:hover {
+            background: #2a3a5a;
+            color: #fff;
         }
 
         .btn-sm.warn {
@@ -921,6 +928,17 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             border-color: #ef4444 !important;
         }
 
+        html.dark .btn-sm.btn-primary {
+            background: #3730a3 !important;
+            border-color: #4f46e5 !important;
+            color: #fff !important;
+        }
+
+        html.dark .btn-sm.btn-primary:hover {
+            background: #4338ca !important;
+            border-color: #6366f1 !important;
+        }
+
         html.dark .btn-sm.warn {
             border-color: #78350f !important;
             color: #fbbf24 !important;
@@ -1052,6 +1070,68 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             color: #cbd5e1 !important;
         }
 
+        html.dark #deleteModal .modal-body > div:first-child {
+            background: #2a1a1a !important;
+            border-color: #7f1d1d !important;
+        }
+
+        html.dark #deleteModal .modal-body > div:first-child > div:first-child {
+            background: #450a0a !important;
+        }
+
+        html.dark #deleteModal .modal-body > div:first-child > div:last-child > div:first-child {
+            color: #fca5a5 !important;
+        }
+
+        html.dark #deleteModal .modal-body > div:first-child > div:last-child > div:last-child {
+            color: #f87171 !important;
+        }
+
+        html.dark #deleteModal .modal-body > div:nth-child(2) > div {
+            background: #252840 !important;
+            border-color: #374151 !important;
+            color: #94a3b8 !important;
+        }
+
+        html.dark #deleteModal .modal-body > div:nth-child(2) > div strong {
+            color: #e2e8f0 !important;
+        }
+
+        html.dark #deleteModal .modal-body p {
+            color: #64748b !important;
+        }
+
+        html.dark #quickEditModal > .modal {
+            background: #1e2130 !important;
+            border: 1px solid #2d3148 !important;
+        }
+
+        html.dark #qe-info {
+            background: #252840 !important;
+            border-color: #374151 !important;
+            color: #94a3b8 !important;
+        }
+
+        html.dark #qe-label {
+            color: #94a3b8 !important;
+        }
+
+        html.dark #qe-input {
+            background: #252840 !important;
+            border-color: #374151 !important;
+            color: #e2e8f0 !important;
+        }
+
+        html.dark #quickEditModal .modal-footer {
+            background: #181b29 !important;
+            border-top-color: #2d3148 !important;
+        }
+
+        html.dark #qe-save-btn {
+            background: #3730a3 !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
+        }
+
         html.dark .dq-no-match {
             color: #64748b !important;
         }
@@ -1080,17 +1160,18 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         {{-- Top Bar --}}
         <div class="topbar">
             <div class="topbar-left">
-                <div>
-                    <div class="topbar-title">
-            Data Quality Scanner
-            <a href="{{ route('support.manual') }}#data-quality" class="help-link-trigger" title="About data quality scanning" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </a>
-        </div>
-                    <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
+                <div class="topbar-title">
+                    Data Quality Scanner
+                    <a href="{{ route('support.manual') }}#data-quality" class="help-link-trigger" title="How to use data quality tools" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </a>
                 </div>
+                <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
+            </div>
+            <div class="topbar-right">
+                <span class="role-tag">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
+            </div>
         </div>
-    </div>
 
 
         {{-- Main Content --}}
@@ -1232,6 +1313,25 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
                     </svg>
                     Yes, Delete Permanently
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MERGE MODAL -->
+    <div class="modal-overlay" id="mergeModal" onclick="if(event.target===this) document.getElementById('mergeModal').classList.remove('open')">
+        <div class="modal" style="max-width:480px">
+            <div class="modal-header">
+                <h3 style="display:flex; align-items:center; gap:8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 22V12m0 0l-4 4m4-4l4 4M2 12h10m0 0l-4-4m4 4l4-4M12 2v10m0 0l4-4m-4 4l-4-4M22 12H12m0 0l4 4m-4-4l-4-4"/></svg>
+                    Consolidate Duplicates
+                </h3>
+                <button class="modal-close" onclick="document.getElementById('mergeModal').classList.remove('open')">&times;</button>
+            </div>
+            <div class="modal-body" id="merge-body">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="document.getElementById('mergeModal').classList.remove('open')">Cancel</button>
+                <button class="btn-delete-confirm" id="btn-confirm-merge" style="background:var(--navy); color:#fff; border:none;">Confirm Merge</button>
             </div>
         </div>
     </div>
@@ -1382,11 +1482,13 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             <div class="issue-head" onclick="toggleIssue('${issue.id}')">
                 <div class="sev-dot" style="background:${dotColor}"></div>
                 <span class="type-badge ${badgeCls}">${esc(typeLabel)}</span>
-                <span class="issue-title">${esc(issue.title)}</span>
-                <span class="issue-count" id="ic-${issue.id}">${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}</span>
-                <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="9 18 15 12 9 6"/>
-                </svg>
+                <span class="issue-title" style="flex:1">${esc(issue.title)}</span>
+                <div style="display:flex; align-items:center; gap:12px;" onclick="event.stopPropagation()">
+                    <span class="issue-count" id="ic-${issue.id}">${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}</span>
+                    <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </div>
             </div>
             <div class="issue-body">
                 <div class="issue-desc">${esc(issue.description)}</div>
@@ -1409,33 +1511,34 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             let actions = '';
             if (issue.type === 'duplicate') {
                 actions = `
-            <button class="btn-sm danger" onclick="openDeleteModal('${rec.permit_id}','${esc(rec.label)}','${issue.id}','${rec.id}')">
+            <button class="btn-sm danger" onclick="event.stopPropagation(); openDeleteModal('${rec.permit_id}','${esc(rec.label)}','${issue.id}','${rec.id}')">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
                 </svg>
                 Delete
             </button>
-            <button class="btn-sm" onclick="ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
+            <button class="btn-sm btn-primary" onclick="event.stopPropagation(); requestMerge('${issue.id}', '${esc(rec.label)}')">Merge</button>
+            <button class="btn-sm" onclick="event.stopPropagation(); ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
             } else if (issue.type === 'missing') {
                 const recType = rec.id.includes('dec-') ? 'deceased' : 'permit';
                 const recId = rec.permit_id || rec.id.split('-').pop();
 
                 actions = `
-            <button class="btn-sm warn" onclick="openQuickEdit('${recType}','${recId}','${rec.field_name}','${esc(rec.field_value)}','${esc(rec.label)}','${issue.id}','${rec.id}')">
+            <button class="btn-sm warn" onclick="event.stopPropagation(); openQuickEdit('${recType}','${recId}','${rec.field_name}','${esc(rec.field_value)}','${esc(rec.label)}','${issue.id}','${rec.id}')">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/>
                 </svg>
                 Fill In
             </button>
-            <button class="btn-sm" onclick="ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
+            <button class="btn-sm" onclick="event.stopPropagation(); ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
             } else {
                 const recType = rec.id.includes('dec-') ? 'deceased' : 'permit';
                 const recId = rec.permit_id || rec.id.split('-').pop();
 
                 actions = `
-            <button class="btn-sm warn" onclick="openQuickEdit('${recType}','${recId}','${rec.field_name}','${esc(rec.field_value)}','${esc(rec.label)}','${issue.id}','${rec.id}')">Review</button>
-            <button class="btn-sm" onclick="ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
+            <button class="btn-sm warn" onclick="event.stopPropagation(); openQuickEdit('${recType}','${recId}','${rec.field_name}','${esc(rec.field_value)}','${esc(rec.label)}','${issue.id}','${rec.id}')">Review</button>
+            <button class="btn-sm" onclick="event.stopPropagation(); ignoreRecord('${issue.id}','${rec.id}')">Ignore</button>`;
             }
 
             return `
@@ -1469,6 +1572,155 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         /* ══════════════════════════════════════
            IGNORE
         ══════════════════════════════════════ */
+        // ── Consolidate / Merge ──
+        async function requestMerge(issueId, groupLabel) {
+            const issue = DQ.issues.find(i => i.id === issueId);
+            if (!issue) return;
+
+            // Only merge records that belong to the same logical group (e.g. same name)
+            const visRecs = issue.records.filter(r => !DQ.ignored.has(r.id) && r.label === groupLabel);
+            if (visRecs.length < 2) {
+                showToast('Cannot Merge', 'At least 2 records are needed to merge for ' + groupLabel + '.', 'amber');
+                return;
+            }
+
+            const body = document.getElementById('merge-body');
+            body.innerHTML = `<div style="padding:2rem; text-align:center;"><div class="spinner" style="margin:0 auto 10px;"></div>Analysing duplicates...</div>`;
+            document.getElementById('mergeModal').classList.add('open');
+
+            // Determine type
+            let type = 'deceased';
+            if (issue.id === 'dup-same-deceased' || issue.id === 'dup-permit-numbers') {
+                type = 'permit';
+            } else if (issue.id === 'dup-deceased-names') {
+                type = 'deceased';
+            }
+
+            const targetIds = visRecs.map(r => r.id.split('-').pop());
+
+            try {
+                const res = await fetch('{{ route("settings.dataquality.preview") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                    body: JSON.stringify({ ids: targetIds, type })
+                });
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                let updatesHtml = '';
+                if (data.updates.length > 0) {
+                    updatesHtml = `
+                        <div style="margin-top:1.25rem; padding:1rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;">
+                            <div style="font-size:12px; font-weight:700; color:#15803d; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                Data to be Consolidated
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                ${data.updates.map(u => `
+                                    <div style="font-size:11px; color:#166534; display:flex; justify-content:space-between; align-items:center;">
+                                        <span>${esc(u.field)}</span>
+                                        <span style="font-weight:600; color:#15803d; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(u.value)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="font-size:10px; color:#16a34a; margin-top:10px; font-style:italic;">* Missing information in the oldest record will be filled using data from the duplicates.</div>
+                        </div>
+                    `;
+                } else {
+                    updatesHtml = `
+                        <div style="margin-top:1.25rem; padding:1rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-align:center;">
+                            <div style="font-size:11px; color:#64748b;">The oldest record already has all necessary information. Duplicates will be removed.</div>
+                        </div>
+                    `;
+                }
+
+                body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+                        <div style="padding:1rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;">
+                            <div style="font-size:11px; font-weight:700; color:#1d4ed8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">Consolidation Plan</div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="width:36px; height:36px; background:#dbeafe; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.5"><path d="M12 22V12m0 0l-4 4m4-4l4 4M2 12h10m0 0l-4-4m4 4l4-4"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size:14px; font-weight:700; color:#1e3a8a;">Merging ${data.victims.length + 1} Records</div>
+                                    <div style="font-size:12px; color:#3b82f6;">Oldest record will be kept as the Master.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Master Record (Oldest)</div>
+                            <div style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:13px; font-weight:600; color:#1e293b;">${esc(data.master.label)}</div>
+                                    <div style="font-size:10px; color:#64748b; margin-top:2px;">Created: ${data.master.date}</div>
+                                </div>
+                                <span style="font-size:10px; font-weight:700; color:#64748b; background:#fff; border:1px solid #e2e8f0; padding:2px 6px; border-radius:4px;">ID: ${data.master.id}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Duplicates to be removed</div>
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                ${data.victims.map(v => `
+                                    <div style="padding:8px 12px; background:#fff; border:1px solid #f1f5f9; border-radius:8px; display:flex; justify-content:space-between; align-items:center; opacity:0.7;">
+                                        <div>
+                                            <div style="font-size:12px; color:#475569;">${esc(v.label)}</div>
+                                            <div style="font-size:10px; color:#94a3b8; margin-top:1px;">Created: ${v.date}</div>
+                                        </div>
+                                        <span style="font-size:10px; color:#94a3b8;">ID: ${v.id}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        ${updatesHtml}
+                    </div>
+                `;
+
+                document.getElementById('btn-confirm-merge').onclick = () => doMerge(targetIds, type, issueId);
+
+            } catch (e) {
+                body.innerHTML = `<div style="padding:2rem; text-align:center; color:#ef4444;">Error loading preview: ${esc(e.message)}</div>`;
+            }
+        }
+
+        async function doMerge(ids, type, issueId) {
+            const btn = document.getElementById('btn-confirm-merge');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="spinner-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:8px;"><circle cx="12" cy="12" r="10" opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg> Merging...`;
+
+            try {
+                const res = await fetch('{{ route("settings.dataquality.merge") }}', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ ids, type })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('mergeModal').classList.remove('open');
+                    showToast('Success', 'Records consolidated successfully.', 'green');
+                    // Mark issue as resolved and re-render
+                    DQ.resolved.add(issueId);
+                    render();
+                } else {
+                    showToast('Error', data.error || 'Merge failed', 'red');
+                }
+            } catch (e) {
+                showToast('Error', 'Connection error — please try again', 'red');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
         function ignoreRecord(issueId, recId) {
             DQ.ignored.add(recId);
             DQ.resolvedCount++;
@@ -1495,7 +1747,20 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         }
 
         function confirmDelete() {
-            // ... (rest of confirmDelete unchanged)
+            if (!DQ.pending) return;
+            const { permitId, label, issueId, recId } = DQ.pending;
+            closeDeleteModal();
+
+            fetch(`/permits/${permitId}?source=data_quality`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+            })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(() => {
+                    ignoreRecord(issueId, recId); // Re-use ignore logic to remove from UI and update counters
+                    showToast('Deleted', `Permit "${label}" and its deceased record were permanently removed.`, 'green');
+                })
+                .catch(() => showToast('Error', 'Could not delete — please try again.', 'red'));
         }
 
         /* ══════════════════════════════════════
@@ -1583,14 +1848,47 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             const issue = DQ.issues.find(i => i.id === issueId);
             if (!issue) return;
 
+            // For duplicates, if a sub-group (grouped by the field_value they share) only has 1 record left, it's no longer a duplicate
+            if (issue.type === 'duplicate') {
+                const counts = {};
+                issue.records.forEach(r => {
+                    if (!DQ.ignored.has(r.id)) {
+                        const key = r.field_value;
+                        counts[key] = (counts[key] || 0) + 1;
+                    }
+                });
+
+                let autoCleared = false;
+                issue.records.forEach(r => {
+                    if (!DQ.ignored.has(r.id) && counts[r.field_value] < 2) {
+                        DQ.ignored.add(r.id);
+                        autoCleared = true;
+                    }
+                });
+
+                if (autoCleared) {
+                    afterRecordChange(issueId);
+                    return;
+                }
+            }
+
             const visRecs = issue.records.filter(r => !DQ.ignored.has(r.id));
 
             if (visRecs.length === 0) {
-                DQ.resolved.add(issueId);
+                if (!DQ.resolved.has(issueId)) {
+                    DQ.resolved.add(issueId);
+                    DQ.resolvedCount++;
+                }
                 document.getElementById('dqi-' + issueId)?.remove();
             } else {
                 const countEl = document.getElementById('ic-' + issueId);
                 if (countEl) countEl.textContent = `${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}`;
+                
+                // Also update individual row visibility
+                issue.records.forEach(r => {
+                    const el = document.getElementById('dqr-' + r.id);
+                    if (el && DQ.ignored.has(r.id)) el.remove();
+                });
             }
 
             const active = DQ.issues.filter(i => !DQ.resolved.has(i.id) && !allIgnored(i));
@@ -1633,7 +1931,6 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
             ttl.textContent = title;
             sb.textContent = sub || '';
             ico.className = 'toast-icon ' + (type || 'green');
-            e
             const svgMap = {
                 green: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
                 red: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',

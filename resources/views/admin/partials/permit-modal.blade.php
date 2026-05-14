@@ -240,6 +240,7 @@ onclick="document.getElementById('permitModal').classList.add('open')"
         overflow-y: auto;
         overscroll-behavior: contain;
         padding: 1.25rem;
+        background: #ffffff;
     }
 
     #permitModal .modal-footer {

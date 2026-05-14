@@ -8,104 +8,126 @@
     @include('admin.partials.design-system')
     <link rel="stylesheet" href="{{ asset('css/sa-sidebar.css') }}">
     <style>
-        /* ── SUPERADMIN AUDIT-STYLE REPORT THEME ── */
         :root {
-            --report-bg: #f8fafc;
-            --section-title: #0f172a;
-            --data-label: #64748b;
-            --accent-soft: rgba(59, 130, 246, 0.08);
-        }
-        .dark {
-            --report-bg: #0b0d11;
-            --section-title: #f8fafc;
-            --data-label: #94a3b8;
-            --accent-soft: rgba(59, 130, 246, 0.15);
+            --audit-bg: #fff;
+            --audit-surface: #f8fafc;
+            --audit-text: #0f172a;
+            --audit-muted: #64748b;
+            --audit-accent: #3b82f6;
+            --audit-green: #10b981;
+            --audit-amber: #f59e0b;
+            --audit-red: #ef4444;
         }
 
-        .audit-header {
-            border-bottom: 3px solid var(--accent);
-            padding-bottom: 2rem;
-            margin-bottom: 2.5rem;
+        .main { background: #fff !important; }
+        .content { padding: 4rem 5rem !important; background: #fff !important; }
+
+        .topbar { 
+            background: #fff; 
+            border-bottom: 1px solid #f1f5f9; 
+            height: 72px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 2rem; 
+            width: 100%;
+        }
+        .topbar-title { font-size: 18px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .topbar-date { font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+        
+        .role-pill-sa { 
+            background: #eff6ff; 
+            color: #3b82f6; 
+            border: 1px solid #bfdbfe; 
+            font-family: 'DM Mono', monospace; 
+            font-size: 10px; 
+            font-weight: 700; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            letter-spacing: .08em; 
+            text-transform: uppercase;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 4px;
         }
-        .audit-title h1 { font-size: 28px; font-weight: 800; color: var(--section-title); letter-spacing: -0.03em; }
-        .audit-title p { font-size: 13px; color: var(--data-label); font-weight: 500; font-family: var(--mono); margin-top: 4px; }
 
-        /* Performance KPI Hub */
-        .kpi-hub {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+        .sa-avatar-circle {
+            width: 34px;
+            height: 34px;
+            background: #0f172a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #e2e8f0;
         }
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.75rem;
+
+        .export-link {
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.15s;
+        }
+        .export-link.excel { color: #10b981; }
+        .export-link.pdf { color: #3b82f6; }
+        .export-link:hover { opacity: 0.8; }
+
+        .audit-report-header { margin-bottom: 3.5rem; border-bottom: 2px solid #3b82f6; padding-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .audit-report-title h1 { font-size: 38px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; margin: 0; }
+        .audit-report-title p { font-size: 13px; font-weight: 700; color: #64748b; letter-spacing: 0.05em; margin-top: 8px; font-family: 'DM Mono', monospace; }
+        
+        .audit-generated { text-align: right; }
+        .audit-generated span { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+        .audit-generated strong { display: block; font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+
+        .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3.5rem; }
+        .kpi-card-new { 
+            background: #fff; 
+            border: 1px solid #f1f5f9; 
+            border-radius: 24px; 
+            padding: 2rem; 
+            box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03); 
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
-        .kpi-label { font-size: 12px; font-weight: 700; color: var(--data-label); text-transform: uppercase; letter-spacing: 0.1em; }
-        .kpi-value { font-size: 42px; font-weight: 800; color: var(--section-title); letter-spacing: -0.04em; line-height: 1; }
-        .kpi-trend { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; width: fit-content; }
-
-        /* Report Sections */
-        .report-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-        
-        .panel-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-        }
-        .panel-title { font-size: 14px; font-weight: 800; color: var(--section-title); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
-        
-        /* Financial Table */
-        .summary-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        .summary-table th {
-            text-align: left;
-            padding: 1.15rem 1.5rem;
-            background: var(--surface-2);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--data-label);
-            text-transform: uppercase;
-        }
-        .summary-table td {
-            padding: 1.25rem 1.5rem;
-            border-top: 1px solid var(--border-2);
-            font-size: 14px;
-        }
-        .summary-table .total-row td {
-            background: var(--surface-2);
-            font-weight: 800;
-            color: var(--accent);
-            font-size: 17px;
+        .kpi-card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .kpi-card-value { font-size: 52px; font-weight: 800; color: #0f172a; letter-spacing: -0.04em; margin-bottom: 16px; }
+        .kpi-card-pill { 
+            font-size: 10px; 
+            font-weight: 700; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            width: fit-content; 
+            text-transform: uppercase; 
+            letter-spacing: 0.02em; 
         }
 
-        .status-pill-lg {
-            display: flex;
-            align-items: center;
+        .analytics-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; }
+        .chart-container-sa { background: #fff; padding: 1.5rem; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03); }
+        .chart-header { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 2rem; display: flex; align-items: center; gap: 8px; }
+        
+        .compliance-list { display: flex; flex-direction: column; gap: 12px; }
+        .compliance-item { 
+            background: #fff; 
+            padding: 1.5rem; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
             justify-content: space-between;
-            background: var(--surface-2);
-            padding: 1rem 1.5rem;
-            border-radius: 14px;
-            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            border-left-width: 4px;
         }
+        .compliance-name { font-size: 14px; font-weight: 700; color: #64748b; }
+        .compliance-count { font-size: 28px; font-weight: 800; color: #0f172a; font-family: 'DM Mono', monospace; }
+
 
         @media (max-width: 1024px) {
             .kpi-hub, .report-grid { grid-template-columns: 1fr; }
@@ -114,134 +136,105 @@
 </head>
 <body>
 
-@include('superadmin.partials.sidebar')
+@include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
         <div class="topbar-left">
             <div class="topbar-title">
                 SuperAdmin Intelligence Audit
-                <a href="{{ route('support.manual') }}#reports" class="help-link-trigger" title="How to use this report" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                </a>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" style="margin-left:4px; opacity:0.8;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
             <div class="topbar-date">{{ now()->format('M d, Y · g:i A') }}</div>
         </div>
-        <div class="topbar-right" style="display:flex; gap:10px; align-items:center;">
-            <span class="role-pill">⚡ Super Admin</span>
-            <div style="width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;background:#1a2744;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;">
+        <div class="topbar-right" style="display:flex; gap:1.5rem; align-items:center;">
+            <span class="role-pill-sa">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14H11V21L20 10H13Z"/></svg>
+                SUPER ADMIN
+            </span>
+            <div class="sa-avatar-circle">
                 @if(auth()->user()->profile_photo)
-                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
                 @else
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 @endif
             </div>
-            <a href="{{ route('superadmin.reports.excel') }}" class="btn-export" style="background: var(--green);">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <a href="{{ route('superadmin.reports.excel') }}" class="export-link excel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
                 Export Excel
             </a>
-            <a href="{{ route('superadmin.reports.pdf') }}" class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <a href="{{ route('superadmin.reports.pdf') }}" class="export-link pdf">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export PDF
             </a>
         </div>
     </div>
 
-
-    <div class="content" style="padding: 3rem;">
-
+    <div class="content">
         <!-- AUDIT HEADER -->
-        <div class="audit-header fade-up">
-            <div class="audit-title">
-                <h1>{{ now()->year }} Operational Audit Report</h1>
+        <div class="audit-report-header">
+            <div class="audit-report-title">
+                <h1>{{ $year }} Operational Audit Report</h1>
                 <p>INTERNAL REVENUE & COMPLIANCE MONITORING · CARMEN LGU</p>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Generated By</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text);">{{ auth()->user()->name }}</div>
+            <div class="audit-generated">
+                <span>Generated By</span>
+                <strong>Super Admin</strong>
             </div>
         </div>
 
-        <!-- KPI HUB -->
-        <div class="kpi-hub fade-up d1">
-            <div class="kpi-card">
-                <span class="kpi-label">Yearly Permits ({{ $year }})</span>
-                <span class="kpi-value">{{ $totalYearlyPermits }}</span>
-                <span class="kpi-trend" style="background: var(--blue-bg); color: var(--blue);">SYSTEM WIDE PERFORMANCE</span>
+        <!-- KPI ROW -->
+        <div class="kpi-row">
+            <div class="kpi-card-new">
+                <span class="kpi-card-label">Yearly Permits ({{ $year }})</span>
+                <span class="kpi-card-value">{{ $totalYearlyPermits }}</span>
+                <span class="kpi-card-pill" style="background: #eff6ff; color: #3b82f6;">System Wide Performance</span>
             </div>
-            <div class="kpi-card">
-                <span class="kpi-label">Projected Revenue Pool</span>
-                <span class="kpi-value">₱{{ number_format($estimatedRevenue) }}</span>
-                <span class="kpi-trend" style="background: var(--green-bg); color: var(--green);">FINANCIAL SUSTAINABILITY</span>
+            <div class="kpi-card-new">
+                <span class="kpi-card-label">Projected Revenue Pool</span>
+                <span class="kpi-card-value">₱{{ number_format($estimatedRevenue) }}</span>
+                <span class="kpi-card-pill" style="background: #ecfdf5; color: #10b981;">Financial Sustainability</span>
             </div>
-            <div class="kpi-card">
-                <span class="kpi-label">Renewals Finalized</span>
-                <span class="kpi-value">{{ $renewedPermits }}</span>
-                <span class="kpi-trend" style="background: var(--purple-bg); color: var(--purple);">GOVERNANCE COMPLIANCE</span>
+            <div class="kpi-card-new">
+                <span class="kpi-card-label">Renewals Finalized</span>
+                <span class="kpi-card-value">{{ $renewedPermits }}</span>
+                <span class="kpi-card-pill" style="background: #fdf4ff; color: #a855f7;">Governance Compliance</span>
             </div>
         </div>
 
         <!-- ANALYTICS GRID -->
-        <div class="report-grid fade-up d2">
-            <div class="panel-box">
-                <div class="panel-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <div class="analytics-grid">
+            <div class="chart-container-sa">
+                <div class="chart-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     Registration Trends (Monthly)
                 </div>
-                <div style="height: 250px;">
+                <div style="height: 300px;">
                     <canvas id="monthlyTrendChartAudit"></canvas>
                 </div>
             </div>
 
-            <div class="panel-box">
-                <div class="panel-title">Service Compliance Health</div>
-                <div class="status-pill-lg" style="border-left: 4px solid var(--green);">
-                    <span style="font-weight: 600; color: var(--data-label);">Active & Compliant</span>
-                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $activePermits }}</span>
-                </div>
-                <div class="status-pill-lg" style="border-left: 4px solid var(--amber);">
-                    <span style="font-weight: 600; color: var(--data-label);">Upcoming Expirations</span>
-                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $expiringSoon }}</span>
-                </div>
-                <div class="status-pill-lg" style="border-left: 4px solid var(--red);">
-                    <span style="font-weight: 600; color: var(--data-label);">Expired / Overdue</span>
-                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $expiredPermits }}</span>
-                </div>
-                <div class="status-pill-lg" style="border-left: 4px solid var(--blue); background: var(--accent-soft);">
-                    <span style="font-weight: 600; color: var(--blue);">System Records</span>
-                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono); color: var(--blue);">{{ $totalDeceased }}</span>
+            <div class="chart-container-sa">
+                <div class="chart-header">Service Compliance Health</div>
+                <div class="compliance-list">
+                    <div class="compliance-item" style="border-left-color: #10b981;">
+                        <span class="compliance-name">Active & Compliant</span>
+                        <span class="compliance-count">{{ $activePermits }}</span>
+                    </div>
+                    <div class="compliance-item" style="border-left-color: #f59e0b;">
+                        <span class="compliance-name">Upcoming Expirations</span>
+                        <span class="compliance-count">{{ $expiringSoon }}</span>
+                    </div>
+                    <div class="compliance-item" style="border-left-color: #ef4444;">
+                        <span class="compliance-name">Expired / Overdue</span>
+                        <span class="compliance-count">{{ $expiredPermits }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- FINANCIAL HUB -->
-        <div class="section-label" style="margin-bottom: 1.5rem;">Financial Breakdown Audit</div>
-        <table class="summary-table fade-up d3">
-            <thead>
-                <tr>
-                    <th width="45%">Burial Service Category</th>
-                    <th style="text-align: center;">Record Count</th>
-                    <th style="text-align: right;">Service rate</th>
-                    <th style="text-align: right;">Accumulated revenue</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($revenueBreakdown as $row)
-                <tr>
-                    <td style="font-weight: 700; color: var(--section-title);">{{ $row['label'] }}</td>
-                    <td style="text-align: center; font-weight: 700; font-family: var(--mono);">{{ $row['count'] }}</td>
-                    <td style="text-align: right; color: var(--data-label);">₱{{ number_format($row['unitPrice']) }}</td>
-                    <td style="text-align: right; font-weight: 800; color: var(--green); font-family: var(--mono);">₱{{ number_format($row['total']) }}</td>
-                </tr>
-                @endforeach
-                <tr class="total-row">
-                    <td>TOTAL ESTIMATED GROSS</td>
-                    <td style="text-align: center;">{{ array_sum(array_column($revenueBreakdown, 'count')) }}</td>
-                    <td></td>
-                    <td style="text-align: right; font-family: var(--mono);">₱{{ number_format($estimatedRevenue) }}</td>
-                </tr>
-            </tbody>
-        </table>
+
+
 
     </div>
 </div>
@@ -259,8 +252,16 @@ new Chart(document.getElementById('monthlyTrendChartAudit').getContext('2d'), {
         datasets: [{
             data: monthlyData,
             borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.04)',
-            borderWidth: 4,
+            backgroundColor: (context) => {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return null;
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+                return gradient;
+            },
+            borderWidth: 5,
             fill: true,
             tension: 0.4,
             pointBackgroundColor: '#fff',

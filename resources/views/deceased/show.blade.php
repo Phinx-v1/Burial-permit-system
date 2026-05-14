@@ -62,7 +62,7 @@
 </head>
 <body>
 
-@include('admin.partials.sidebar')
+@include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
@@ -75,7 +75,7 @@
             <span class="topbar-title">{{ $deceased->first_name }} {{ $deceased->last_name }}</span>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem">
-            <span class="role-pill">{{ auth()->user()->roles->first()?->name ?? 'Admin' }}</span>
+            <span class="role-pill">{{ auth()->user()->role === 'super_admin' ? 'Super Admin' : (auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin') }}</span>
         </div>
     </div>
 
@@ -98,13 +98,13 @@
                         View Permit
                     </a>
                 @endif
-                <form method="POST" action="{{ route('deceased.destroy', $deceased) }}" style="display:contents" onsubmit="return confirm('Permanently delete this record?')">
+                <form method="POST" action="{{ route('deceased.destroy', $deceased) }}" id="deleteDeceasedForm" style="display:none">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                        Delete
-                    </button>
                 </form>
+                <button type="button" class="btn btn-danger" onclick="openDeleteModal('Permanently delete this deceased record and all linked data?', '{{ $deceased->first_name }} {{ $deceased->last_name }}', 'deleteDeceasedForm')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                    Delete
+                </button>
             </div>
         </div>
 
@@ -222,6 +222,8 @@
     <div class="toast-bar green"></div>
 </div>
 @endif
+
+@include('admin.partials.delete-modal')
 
 <script>
 (function(){

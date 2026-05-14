@@ -34,21 +34,21 @@ class ActivityLog extends Model
     public static function record(
         string $action,
         string $modelType,
-        ?int   $modelId    = null,
+        ?int $modelId = null,
         ?string $modelLabel = null,
-        ?array  $oldValues  = null,
-        ?array  $newValues  = null,
+        ?array $oldValues = null,
+        ?array $newValues = null,
         ?string $description = null
     ): self {
         return self::create([
-            'user_id'     => auth()->id(),
-            'action'      => $action,
-            'model_type'  => $modelType,
-            'model_id'    => $modelId,
+            'user_id' => auth()->id(),
+            'action' => $action,
+            'model_type' => $modelType,
+            'model_id' => $modelId,
             'model_label' => $modelLabel,
-            'old_values'  => $oldValues,
-            'new_values'  => $newValues,
-            'ip_address'  => request()->ip(),
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => request()->ip(),
             'description' => $description,
         ]);
     }
@@ -57,29 +57,46 @@ class ActivityLog extends Model
     public function actionColor(): string
     {
         switch ($this->action) {
-            case 'created':  return 'green';
-            case 'updated':  return 'blue';
-            case 'deleted':  return 'red';
-            case 'active':   return 'green';
-            case 'expiring': return 'amber';
-            case 'expired':  return 'red';
-            case 'renewed':  return 'amber';
-            case 'imported': return 'violet';
-            case 'login':    return 'gray';
-            case 'logout':   return 'gray';
-            default:         return 'yellow';
+            case 'created':
+                return 'green';
+            case 'updated':
+                return 'blue';
+            case 'deleted':
+                return 'red';
+            case 'active':
+                return 'green';
+            case 'expiring':
+                return 'amber';
+            case 'expired':
+                return 'red';
+            case 'renewed':
+                return 'amber';
+            case 'imported':
+                return 'violet';
+            case 'login':
+                return 'gray';
+            case 'logout':
+                return 'gray';
+            default:
+                return 'yellow';
         }
     }
 
     public function actionIcon(): string
     {
         switch ($this->action) {
-            case 'created':  return '+';
-            case 'updated':  return '✎';
-            case 'deleted':  return '✕';
-            case 'renewed':  return '↻';
-            case 'imported': return '⇩';
-            default:         return '•';
+            case 'created':
+                return '+';
+            case 'updated':
+                return '✎';
+            case 'deleted':
+                return '✕';
+            case 'renewed':
+                return '↻';
+            case 'imported':
+                return '⇩';
+            default:
+                return '•';
         }
     }
 }

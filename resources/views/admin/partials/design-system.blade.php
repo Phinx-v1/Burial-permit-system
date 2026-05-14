@@ -60,7 +60,7 @@ Include this in every page's
         }
 
         .main {
-            flex: 1;
+            width: 100%;
             display: flex;
             flex-direction: column;
             min-width: 0;
@@ -75,9 +75,6 @@ Include this in every page's
             align-items: center;
             justify-content: space-between;
             padding: 0 1.75rem;
-            position: sticky;
-            top: 0;
-            z-index: 40;
         }
 
         .topbar-left {
@@ -905,7 +902,7 @@ Include this in every page's
         }
 
         .modal {
-            background: var(--surface);
+            background: #ffffff;
             border-radius: 14px;
             width: 100%;
             max-width: 560px;
@@ -964,6 +961,7 @@ Include this in every page's
             gap: .85rem;
             max-height: 72vh;
             overflow-y: auto;
+            background: #ffffff;
         }
 
         .modal-footer {
@@ -1334,10 +1332,7 @@ Include this in every page's
             color: #94a3b8 !important;
         }
 
-        html.dark .modal {
-            background: #1e2130 !important;
-        }
-
+        html.dark .modal,
         html.dark .modal-body {
             background: #1e2130 !important;
         }

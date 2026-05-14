@@ -336,8 +336,16 @@
         position: relative;
     }
 
-    .user-name { font-size: 12px; color: #fff; font-weight: 500; }
-    .user-role { font-size: 10px; color: rgba(255, 255, 255, .4); }
+    .user-name {
+        font-size: 12px;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .user-role {
+        font-size: 10px;
+        color: rgba(255, 255, 255, .4);
+    }
 
     .user-actions {
         display: flex;
@@ -383,11 +391,12 @@
         transition: all .2s;
     }
 
-    html.collapsed .btn-logout span { display: none; }
     html.collapsed .btn-logout {
         justify-content: flex-start;
         padding: 0.65rem 15.5px; /* Center 13px icon: 12px padding + 15.5px = 27.5px offset */
     }
+
+    html.collapsed .btn-logout span { display: none; }
 
     .btn-logout:hover {
         border-color: #ef4444;
@@ -395,6 +404,7 @@
         background: rgba(239, 68, 68, 0.05);
     }
 
+    /* Dark mode toggle button */
     .dark-toggle {
         width: 100%;
         background: none;
@@ -445,8 +455,13 @@
         transition: transform .2s;
     }
 
-    html.dark .dark-toggle-pill { background: #6366f1; }
-    html.dark .dark-toggle-pill::after { transform: translateX(14px); }
+    html.dark .dark-toggle-pill {
+        background: #6366f1;
+    }
+
+    html.dark .dark-toggle-pill::after {
+        transform: translateX(14px);
+    }
 
     /* ═══ GLOBAL DARK MODE STYLES ═══
        Applied to EVERY page via this shared partial */
@@ -586,110 +601,79 @@
                 </svg>
             </div>
             <div class="nav-section-content">
-                <a href="{{ auth()->user()->role === 'super_admin' ? route('superadmin.dashboard') : route('dashboard') }}"
-                   class="nav-item {{ request()->routeIs('dashboard') || request()->routeIs('superadmin.dashboard') ? 'active' : '' }}"
-                   title="Dashboard (Alt + 1)">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <a href="{{ route('superadmin.dashboard') }}"
+                    class="nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                    </svg>
                     <span>Dashboard</span>
                 </a>
             </div>
         </div>
 
-        @if(auth()->user()->role === 'super_admin')
-            <div class="nav-group" id="group-analytics">
-                <div class="nav-section" onclick="toggleSection(this)">
-                    ANALYTICS
-                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                    </svg>
-                </div>
-                <div class="nav-section-content">
-                    <a href="{{ route('superadmin.reports') }}" class="nav-item {{ request()->routeIs('superadmin.reports') ? 'active' : '' }}"
-                        title="Reports (Alt + 2)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        <span>Reports</span>
-                    </a>
-                    <a href="{{ route('superadmin.activity') }}" class="nav-item {{ request()->routeIs('superadmin.activity') ? 'active' : '' }}"
-                        title="Activity Log (Alt + 3)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                        </svg>
-                        <span>Activity Log</span>
-                    </a>
-                    <a href="{{ route('superadmin.geomap') }}" class="nav-item {{ request()->routeIs('superadmin.geomap') ? 'active' : '' }}"
-                        title="Geomap Analytics (Alt + 4)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span>Geomap Analytics</span>
-                    </a>
-                </div>
+        <div class="nav-group" id="group-analytics">
+            <div class="nav-section" onclick="toggleSection(this)">
+                ANALYTICS
+                <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
             </div>
-        @else
-            <div class="nav-group" id="group-permits">
-                <div class="nav-section" onclick="toggleSection(this)">
-                    PERMITS
-                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="18 15 12 9 6 15"></polyline>
+            <div class="nav-section-content">
+                <a href="{{ route('superadmin.reports') }}"
+                    class="nav-item {{ request()->routeIs('superadmin.reports') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                     </svg>
-                </div>
-                <div class="nav-section-content">
-                    <a href="{{ route('permits.index') }}" class="nav-item {{ request()->routeIs('permits.*') ? 'active' : '' }}"
-                        title="Burial Permits (Alt + 5)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>Burial Permits</span>
-                    </a>
-                </div>
+                    <span>Reports</span>
+                </a>
+                <a href="{{ route('superadmin.activity') }}"
+                    class="nav-item {{ request()->routeIs('superadmin.activity') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <span>Activity Log</span>
+                </a>
             </div>
+        </div>
 
-            <div class="nav-group" id="group-cemetery">
-                <div class="nav-section" onclick="toggleSection(this)">
-                    CEMETERY
-                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                    </svg>
-                </div>
-                <div class="nav-section-content">
-                    <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}"
-                        title="Cemetery Map (Alt + 6)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span>Cemetery Map</span>
-                    </a>
-                </div>
+        <div class="nav-group" id="group-system">
+            <div class="nav-section" onclick="toggleSection(this)">
+                SYSTEM
+                <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
             </div>
+            <div class="nav-section-content">
+                <a href="{{ route('superadmin.users.index') }}"
+                    class="nav-item {{ request()->routeIs('superadmin.users.*') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                        <path d="M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                    <span>User Management</span>
+                </a>
+            </div>
+        </div>
 
-            <div class="nav-group" id="group-tools">
-                <div class="nav-section" onclick="toggleSection(this)">
-                    TOOLS
-                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                    </svg>
-                </div>
-                <div class="nav-section-content">
-                    <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}"
-                        title="Reports (Alt + 7)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        <span>Reports</span>
-                    </a>
-                    <a href="{{ route('import.show') }}" class="nav-item {{ request()->routeIs('import.*') ? 'active' : '' }}"
-                        title="Import Excel (Alt + 8)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        <span>Import Excel</span>
-                    </a>
-                </div>
-            </div>
-        @endif
     </nav>
 
     <div class="sidebar-footer">
+        {{-- Dark mode toggle --}}
         <button class="dark-toggle" onclick="toggleDark()" id="darkToggleBtn">
             <span id="darkToggleLabel">🌙 Dark Mode</span>
             <div class="dark-toggle-pill" id="darkPill"></div>
         </button>
 
         <div class="user-info">
-            <div class="user-avatar">
+            <div class="user-avatar" id="sidebarAvatar">
                 @if(auth()->user()->profile_photo)
                     <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
                 @else
@@ -698,18 +682,10 @@
             </div>
             <div>
                 <div class="user-name">{{ auth()->user()->name }}</div>
-                <div class="user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
+                <div class="user-role">Super Admin</div>
             </div>
 
             <div class="user-actions">
-                @if(auth()->user()->role === 'admin')
-                    <a href="{{ route('settings.index') }}" class="action-btn" title="Settings">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                        </svg>
-                    </a>
-                @endif
                 <a href="{{ route('support.manual') }}" class="action-btn" title="User Manual">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
@@ -722,7 +698,11 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn-logout">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
                 <span>Sign Out</span>
             </button>
         </form>
@@ -730,7 +710,8 @@
 </aside>
 
 <script>
-    (function() {
+    // ── Dark mode & Sidebar persistence ──
+    (function () {
         if (localStorage.getItem('lgu_dark') === '1') {
             document.documentElement.classList.add('dark');
         }
@@ -742,12 +723,6 @@
     function toggleDark() {
         const isDark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('lgu_dark', isDark ? '1' : '0');
-        updateDarkLabel(isDark);
-    }
-
-    function updateDarkLabel(isDark) {
-        const label = document.getElementById('darkToggleLabel');
-        if (label) label.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
     }
 
     function toggleSidebar() {
@@ -756,64 +731,35 @@
     }
 
     function toggleSection(header) {
-        const group = header.parentElement;
-        const isCollapsed = group.classList.toggle('is-collapsed');
-        if (group.id) {
-            localStorage.setItem('lgu_nav_' + group.id, isCollapsed ? '1' : '0');
-        }
+        const group = header.closest('.nav-group');
+        group.classList.toggle('is-collapsed');
+        
+        // Save state to localStorage
+        const groupId = group.id;
+        const isCollapsed = group.classList.contains('is-collapsed');
+        localStorage.setItem('lgu_nav_' + groupId, isCollapsed ? '1' : '0');
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        updateDarkLabel(document.documentElement.classList.contains('dark'));
-
-        // Restore nav group collapsed states
+    // Restore section states
+    document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.nav-group').forEach(group => {
-            if (group.id && localStorage.getItem('lgu_nav_' + group.id) === '1') {
+            if (localStorage.getItem('lgu_nav_' + group.id) === '1') {
                 group.classList.add('is-collapsed');
             }
         });
     });
 
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || (e.metaKey && !e.ctrlKey)) && e.key.toLowerCase() === 'f') {
-            const activeEl = document.activeElement;
-            const isInput = activeEl instanceof HTMLInputElement || activeEl instanceof HTMLTextAreaElement;
-            if (!isInput && !e.shiftKey && !e.altKey) {
-                const searchEl = document.querySelector('.search-input, input[placeholder*="Search"]');
-                if (searchEl) {
-                    e.preventDefault();
-                    searchEl.focus();
-                    if (searchEl.select) searchEl.select();
-                }
-            }
-        }
-        if (e.altKey && e.key.toLowerCase() === 'd') {
-            e.preventDefault();
-            if (typeof toggleDark === 'function') toggleDark();
-        }
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        // Alt + B to toggle sidebar
         if (e.altKey && e.key.toLowerCase() === 'b') {
-            e.preventDefault();
             toggleSidebar();
         }
-        // Alt + 1-9: Navigate sidebar
-        const isDigit = e.key >= '1' && e.key <= '9';
-        const isNumpad = e.code && e.code.startsWith('Numpad') && ['1','2','3','4','5','6','7','8','9'].includes(e.code.slice(-1));
-
-        if (e.altKey && (isDigit || isNumpad)) {
-            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-            const num = isDigit ? parseInt(e.key) : parseInt(e.code.slice(-1));
-            const index = num - 1;
-            if (navItems[index]) {
-                e.preventDefault();
-                navItems[index].click();
-            }
+        // Alt + 1, 2, 3... for nav items
+        if (e.altKey && !isNaN(e.key)) {
+            const index = parseInt(e.key) - 1;
+            const items = document.querySelectorAll('.nav-item');
+            if (items[index]) items[index].click();
         }
     });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.querySelector('.search-input');
-        if (searchInput) searchInput.focus();
-    });
 </script>
-
-@include('admin.partials.persistence')

@@ -88,16 +88,21 @@
     </style>
 </head>
 <body>
-@include('admin.partials.sidebar')
+@include(auth()->user()->role === 'super_admin' ? 'superadmin.partials.sidebar' : 'admin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
         <div class="topbar-left">
-            <div class="topbar-title">Import Excel</div>
+            <div class="topbar-title">
+                Import Excel
+                <a href="{{ route('support.manual') }}#import" class="help-link-trigger" title="How to import data" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </a>
+            </div>
             <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
         </div>
         <div class="topbar-right">
-            <span class="role-pill">Admin</span>
+            <span class="role-pill">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
         </div>
     </div>
 
@@ -183,7 +188,7 @@
                                 @if(!empty($reasons))
                                     <span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
                                     <ul class="reasons-list">
-                                        @foreach($reasons as $r)<li>· {{ $r }}</li>@endforeach
+                                        @foreach($reasons as $r)<li>· {{ is_array($r) ? "Row {$r['row']}: {$r['reason']}" : $r }}</li>@endforeach
                                     </ul>
                                 @endif
                             @else
@@ -288,7 +293,7 @@ window.addEventListener('DOMContentLoaded', function() {
             $imp  = (int) session('_import_imported', 0);
             $skip = (int) session('_import_skipped', 0);
             $rsns = session('skip_reasons', []);
-            $prev = collect($rsns)->take(3)->map(fn($r) => e($r))->implode(' | ');
+            $prev = collect($rsns)->take(3)->map(fn($r) => is_array($r) ? e("Row {$r['row']}: {$r['reason']}") : e($r))->implode(' | ');
             $xtra = count($rsns) > 3 ? ' +' . (count($rsns) - 3) . ' more' : '';
         @endphp
         @if($imp > 0 && $skip === 0)
