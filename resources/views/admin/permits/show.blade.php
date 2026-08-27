@@ -38,53 +38,63 @@
             top: 0;
             z-index: 100;
             background: var(--navy);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
+
         .topbar-left {
             display: flex;
             align-items: center;
             flex-direction: row !important;
             gap: 0.5rem;
         }
+
         .topbar-right {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .topbar-back {
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            color: rgba(255,255,255,0.55);
+            color: rgba(255, 255, 255, 0.55);
             font-size: 13px;
             font-weight: 500;
             text-decoration: none;
             transition: color 0.15s;
         }
+
         .topbar-back:hover {
             color: #fff;
         }
+
         .topbar-sep {
-            color: rgba(255,255,255,0.2);
+            color: rgba(255, 255, 255, 0.2);
             font-size: 11px;
         }
+
         .topbar .topbar-title {
             color: #fff !important;
         }
+
         .topbar .role-pill {
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
         }
+
         .topbar .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
             color: #fff;
         }
+
         .topbar .btn-secondary:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
-        html.dark .topbar { 
+
+        html.dark .topbar {
             background: var(--navy);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -1165,19 +1175,22 @@
                     Permits
                 </a>
                 <span class="topbar-sep">/</span>
-                <div class="topbar-title" style="font-weight: 700;">{{ optional($permit->deceased)->full_name ?? 'Unknown Deceased' }}</div>
+                <div class="topbar-title" style="font-weight: 700;">
+                    {{ optional($permit->deceased)->full_name ?? 'Unknown Deceased' }}
+                </div>
             </div>
             <div class="topbar-right">
-                <span class="role-pill">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
+                <span
+                    class="role-pill">{{ auth()->user()->role === 'cemetery_manager' ? 'Cemetery Manager' : 'Admin' }}</span>
                 @if(auth()->user()->role === 'admin')
-                <button type="button" class="btn btn-secondary" onclick="openEditModal()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        style="margin-right: 4px;">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    Edit
-                </button>
+                    <button type="button" class="btn btn-secondary" onclick="openEditModal()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            style="margin-right: 4px;">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Edit
+                    </button>
                 @endif
             </div>
         </div>
@@ -1227,7 +1240,8 @@
                     <div class="hero-eyebrow">Burial Permit</div>
                     <div class="hero-no">{{ $permit->permit_number }}</div>
                     <div class="hero-meta">Issued {{ $permit->created_at->format('F d, Y') }} ·
-                        {{ $permit->created_at->diffForHumans() }}</div>
+                        {{ $permit->created_at->diffForHumans() }}
+                    </div>
                 </div>
                 <div class="hero-actions">
                     @if($cs === 'expired')
@@ -1249,9 +1263,11 @@
                     </a>
 
                     @if($cs === 'expired' || $cs === 'expiring')
-                        <form id="renew-form-main" method="POST" action="{{ route('permits.renew', $permit) }}" style="display:contents">
+                        <form id="renew-form-main" method="POST" action="{{ route('permits.renew', $permit) }}"
+                            style="display:contents">
                             @csrf
-                            <button type="button" class="btn btn-warn" onclick="openRenewModal('{{ $permit->permit_number }}', '{{ str_replace('\'', '\\\'', $permit->deceased->full_name) }}', 'renew-form-main')">
+                            <button type="button" class="btn btn-warn"
+                                onclick="openRenewModal('{{ $permit->permit_number }}', '{{ str_replace('\'', '\\\'', $permit->deceased->full_name) }}', 'renew-form-main')">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
                                     <path d="M3 12a9 9 0 109-9" />
@@ -1262,9 +1278,11 @@
                         </form>
                     @endif
 
-                    <form method="POST" action="{{ route('permits.destroy', $permit) }}" style="display:contents" id="deletePermitForm_{{ $permit->id }}">
+                    <form method="POST" action="{{ route('permits.destroy', $permit) }}" style="display:contents"
+                        id="deletePermitForm_{{ $permit->id }}">
                         @csrf @method('DELETE')
-                        <button type="button" class="btn btn-danger" onclick="openDeleteModal('Delete this permit permanently?', '{{ $permit->permit_number }}', 'deletePermitForm_{{ $permit->id }}')">
+                        <button type="button" class="btn btn-danger"
+                            onclick="openDeleteModal('Delete this permit permanently?', '{{ $permit->permit_number }}', 'deletePermitForm_{{ $permit->id }}')">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <polyline points="3 6 5 6 21 6" />
@@ -1294,7 +1312,8 @@
                         <div class="field">
                             <div class="fl">Full Name</div>
                             <div class="fv-lg">{{ optional($permit->deceased)->first_name }}
-                                {{ optional($permit->deceased)->last_name }}</div>
+                                {{ optional($permit->deceased)->last_name }}
+                            </div>
                         </div>
                         <div class="g3">
                             <div class="field">
@@ -1338,22 +1357,22 @@
                             @if($assigned)
                                 <a href="{{ route('cemetery.map') }}?search={{ urlencode($permit->permit_number) }}"
                                     id="view-on-map-btn" style="
-                                       display: flex; align-items: center; justify-content: center; gap: 8px;
-                                       width: 100%; box-sizing: border-box;
-                                       padding: 0.8rem 1rem;
-                                       background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
-                                       color: #fff;
-                                       border: none;
-                                       border-radius: 12px;
-                                       font-family: 'DM Sans', sans-serif;
-                                       font-size: 13px;
-                                       font-weight: 700;
-                                       letter-spacing: 0.02em;
-                                       text-decoration: none;
-                                       cursor: pointer;
-                                       box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35), 0 1px 3px rgba(0,0,0,0.12);
-                                       transition: transform .15s ease, box-shadow .15s ease;
-                                   "
+                                                   display: flex; align-items: center; justify-content: center; gap: 8px;
+                                                   width: 100%; box-sizing: border-box;
+                                                   padding: 0.8rem 1rem;
+                                                   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+                                                   color: #fff;
+                                                   border: none;
+                                                   border-radius: 12px;
+                                                   font-family: 'DM Sans', sans-serif;
+                                                   font-size: 13px;
+                                                   font-weight: 700;
+                                                   letter-spacing: 0.02em;
+                                                   text-decoration: none;
+                                                   cursor: pointer;
+                                                   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35), 0 1px 3px rgba(0,0,0,0.12);
+                                                   transition: transform .15s ease, box-shadow .15s ease;
+                                               "
                                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(37,99,235,0.45), 0 1px 3px rgba(0,0,0,0.12)'"
                                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.12)'">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1368,17 +1387,17 @@
                                 </a>
                             @else
                                 <div style="
-                                    display: flex; align-items: center; justify-content: center; gap: 8px;
-                                    width: 100%; box-sizing: border-box;
-                                    padding: 0.75rem 1rem;
-                                    border-radius: 12px;
-                                    border: 1.5px dashed var(--border);
-                                    color: var(--text-3);
-                                    font-size: 12px;
-                                    font-weight: 600;
-                                    font-family: 'DM Sans', sans-serif;
-                                    background: var(--surface-2);
-                                ">
+                                                display: flex; align-items: center; justify-content: center; gap: 8px;
+                                                width: 100%; box-sizing: border-box;
+                                                padding: 0.75rem 1rem;
+                                                border-radius: 12px;
+                                                border: 1.5px dashed var(--border);
+                                                color: var(--text-3);
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                font-family: 'DM Sans', sans-serif;
+                                                background: var(--surface-2);
+                                            ">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="1.75">
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
@@ -1456,7 +1475,8 @@
                             <div class="field">
                                 <div class="fl">O.R. Number</div>
                                 <div class="fv" style="font-family:var(--mono);color:var(--accent);font-weight:600">
-                                    {{ $permit->or_number }}</div>
+                                    {{ $permit->or_number }}
+                                </div>
                             </div>
                         @endif
                         @if($permit->remarks)
@@ -1522,14 +1542,17 @@
                                     <div class="doc-name">{{ $doc->file_name }}</div>
                                     <div class="doc-meta">{{ strtoupper($ext) }} ·
                                         {{ $doc->created_at->format('M d, Y') }}@if($doc->uploadedBy) ·
-                                        {{ $doc->uploadedBy->name }}@endif</div>
+                                        {{ $doc->uploadedBy->name }}@endif
+                                    </div>
                                 </div>
                                 <div class="doc-actions" onclick="event.stopPropagation()">
                                     <a href="{{ $viewUrl }}" class="btn-doc" target="_blank">↓ Download</a>
                                     <form method="POST" action="{{ route('documents.destroy', $doc) }}"
                                         id="deleteDocForm_{{ $doc->id }}" style="display:inline">
                                         @csrf @method('DELETE')
-                                        <button type="button" class="btn-doc btn-doc-delete" onclick="openDeleteModal('Delete this file permanently?', '{{ addslashes($doc->file_name) }}', 'deleteDocForm_{{ $doc->id }}')">✕ Delete</button>
+                                        <button type="button" class="btn-doc btn-doc-delete"
+                                            onclick="openDeleteModal('Delete this file permanently?', '{{ addslashes($doc->file_name) }}', 'deleteDocForm_{{ $doc->id }}')">✕
+                                            Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -1641,11 +1664,13 @@
                                         </td>
                                         <td style="padding:.75rem 1.25rem;vertical-align:middle">
                                             <div style="font-size:12.5px;font-weight:600;color:var(--text-1)">
-                                                {{ $log->created_at->format('M d, Y') }}</div>
+                                                {{ $log->created_at->format('M d, Y') }}
+                                            </div>
                                             <div
                                                 style="font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:2px">
                                                 {{ $log->created_at->format('h:i A') }} ·
-                                                {{ $log->created_at->diffForHumans() }}</div>
+                                                {{ $log->created_at->diffForHumans() }}
+                                            </div>
                                         </td>
                                         <td style="padding:.75rem 1.25rem;vertical-align:middle">
                                             <span
@@ -1906,7 +1931,8 @@
                                 <select class="em-input" name="permit_type">
                                     @foreach(['cemented' => 'Cemented (₱1,000)', 'niche_1st' => '1st Floor Niche (₱8,000)', 'niche_2nd' => '2nd Floor Niche (₱6,600)', 'niche_3rd' => '3rd Floor Niche (₱5,700)', 'niche_4th' => '4th Floor Niche (₱5,300)', 'bone_niches' => 'Bone Niches (₱5,000)'] as $val => $lbl)
                                         <option value="{{ $val }}" {{ $permit->permit_type === $val ? 'selected' : '' }}>
-                                            {{ $lbl }}</option>
+                                            {{ $lbl }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -2055,8 +2081,8 @@
 
 
 
-@include('admin.partials.renewal-modal')
-@include('admin.partials.delete-modal')
+    @include('admin.partials.renewal-modal')
+    @include('admin.partials.delete-modal')
 </body>
 
 </html>

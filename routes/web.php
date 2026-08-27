@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/superadmin/data-quality', [SettingsController::class, 'dataQualityPage'])
             ->name('superadmin.dataquality');
     });
-
+ 
     // ── Super Admin + Cemetery Manager ──
     Route::middleware(['role:super_admin|cemetery_manager'])->group(function () {
         Route::apiResource('/niche-grids', CemeteryGridController::class)->except(['index'])->names('superadmin.nichegrids');
@@ -56,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/data-quality', [SettingsController::class, 'dataQualityPage'])
             ->name('admin.dataquality');
 
-        // Settings
+         // Settings
         Route::get('/settings',                   [SettingsController::class, 'index'])->name('settings.index');
         Route::put('/settings/{section}',         [SettingsController::class, 'update'])->name('settings.update');
         Route::post('/settings/reset/{target}',   [SettingsController::class, 'reset'])->name('settings.reset');
@@ -69,7 +69,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/profile-photo',       [SettingsController::class, 'updateProfilePhoto'])->name('settings.profile.update');
         Route::delete('/settings/profile-photo',     [SettingsController::class, 'deleteProfilePhoto'])->name('settings.profile.delete');
     });
-
     // ── Admin + Super Admin + Cemetery Manager ──
     Route::middleware(['role:admin|super_admin|cemetery_manager'])->group(function () {
         
